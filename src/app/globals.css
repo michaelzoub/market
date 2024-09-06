@@ -30,6 +30,55 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .bgblack {
+    background-color: #0F1117;
+  }
+  .tradebox {
+    background-color: #1C1F29;
+  }
+  .insidebox {
+    background-color: #232732;
+  }
+  .searchbg {
+    background-color: #2B2F3C;
+  }
+  .filterbg {
+    background-color: #1C1F29;
+  }
+  .redaccent {
+    background-color: #DE4646;
+  }
+
+  .redhoveraccent {
+    background-color: #e96969;
+  }
+
+  .borderinsidebox {
+    border-color: #232732;
+  }
+
+  .animate-show {
+    transition: all 0.5s ease;
+    opacity: 1;
+    transform: scale(1);
+  }
+  .hiddenLogin {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  .mq {
+    @media only screen and (max-width: 600px) {
+      body {
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+      }
+    }
+    @media only screen and (max-width: 400px) {
+      body {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
+  }
 
 }
 

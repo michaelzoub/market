@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Cantarell } from "next/font/google";
+import { Monda } from "next/font/google";
 import "./globals.css";
 
 import { Navbar } from "./navbar";
 
-const inter = Cantarell({ subsets: ["latin"], weight: ["400"] });
+const inter = Monda({ subsets: ["latin"], weight: ["400"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
