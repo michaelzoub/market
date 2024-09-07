@@ -1,12 +1,12 @@
 'use client'
 import Image from "next/image";
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from "next/link";
 
 //this array would have ITEM name, image url, condition etc, price and add cart function
 const array = ['','','','','','','','','','','','','','','','','','','','','','','','','']
 const heroes = ['Shiv','Seven','McGinnis']
-const fakeItems = [{id:0, hero: 'Shiv', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsUFJ5KBFZv668FFQznaKdID5D6d23ldHSwKOmZeyEz21XvZZ12LzE9t6nigbgqkplNjihJIaLMlhpF1ZeR5c/360fx360f', rarity: 'common'}, {id:1, hero: 'Seven', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsQ1xmLBcF5uj2FBdy3P7HTjlH09G_hoGMkrmkNuODwG8F7ZMl2bqSoI_22ATg_0s6a2qiIofDdA5rNVmG8la5k7i6m9bi60_Jt_x9/360fx360f', rarity: 'common'}, {id:2, hero: 'shiv', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsUFJ5KBFZv668FFQznaKdID5D6d23ldHSwKOmZeyEz21XvZZ12LzE9t6nigbgqkplNjihJIaLMlhpF1ZeR5c/360fx360f', rarity: 'common'}]
+const fakeItems = [{id:0, price: 1, hero: 'Shiv', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsUFJ5KBFZv668FFQznaKdID5D6d23ldHSwKOmZeyEz21XvZZ12LzE9t6nigbgqkplNjihJIaLMlhpF1ZeR5c/360fx360f', rarity: 'common'}, {id:1, price: 1000, hero: 'Seven', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsQ1xmLBcF5uj2FBdy3P7HTjlH09G_hoGMkrmkNuODwG8F7ZMl2bqSoI_22ATg_0s6a2qiIofDdA5rNVmG8la5k7i6m9bi60_Jt_x9/360fx360f', rarity: 'common'}, {id:2, price: 2, hero: 'shiv', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsUFJ5KBFZv668FFQznaKdID5D6d23ldHSwKOmZeyEz21XvZZ12LzE9t6nigbgqkplNjihJIaLMlhpF1ZeR5c/360fx360f', rarity: 'common'}]
 
 let temp: any = [] //this is where filters are stored until reload
 
@@ -24,6 +24,8 @@ export default function Home() {
 
   const [inCart, setInCart] = useState<string[]>([])
 
+  const [pricerange, setPricerange] = useState(0)
+
   function filterFunc() {
     filter ? setFilter(false) : setFilter(true)
   }
@@ -32,6 +34,7 @@ export default function Home() {
   }
 
   function checkboxFilter(e:any) {
+    //add all object (id, hero, price, etc)
     let hero = e.target.value 
     if (e.target.checked) {
       // Add checked hero to the array
@@ -39,7 +42,6 @@ export default function Home() {
       setCheckedHeroes((prevHeroes) => [...prevHeroes, hero]);
       
     } else {
-      // Remove unchecked hero from the array
       setCheckedHeroes((prevHeroes) => prevHeroes.filter((h) => h !== hero));
       if (checkedHeroes.length == 0) {
         setCheckedGeneral(false)
@@ -79,8 +81,36 @@ export default function Home() {
     }
   }
 
+
+  function zero(e: any) {
+    //check tomorrow (drunk)
+    setPricerange(e.target.value)
+    console.log('price range:',pricerange)
+    console.log(fakeItems.filter((test:any) => test.price > pricerange))
+    if (fakeItems.find((test:any) => test.price < pricerange)) {
+      console.log('under target price')
+    } else {
+      console.log('in the bounds')
+      let test = fakeItems.filter((test:any) => test.price > pricerange)
+      console.log('test:', test)
+      let test2 = test.map((e) => e.hero)
+      console.log('for each try:', test.map((e) => e.hero))
+      setCheckedGeneral(true)
+      setCheckedHeroes(test2)
+      console.log('checked heroes:',checkedHeroes)
+    }
+  }
+
+  function infinity() {
+//copy fixed code above and inverse
+  }
+
+  function itemSearch() {
+    //add search for item functionality 
+  }
+
   return (
-    <main className="flex min-h-screen flex-row items-center bgblack gap-8 text-white">
+    <main className="flex min-h-screen flex-row items-center bgblack gap-8 text-white overflow-hidden">
 
       <div className="flex flex-row mx-auto h-screen">
       <div className="flex-col w-fit">
@@ -90,7 +120,7 @@ export default function Home() {
       </div>
       <div className="flex flex-col p-2 tradebox h-[85%] mt-3 rounded-md">
       <input className="w-full px-2 m-1 mb-2 mx-auto rounded-md searchbg " placeholder="⌕ Search"></input>
-      <div className="grid grid-cols-1 overflow-auto gap-2 md:grid-cols-4">
+      <div className="grid grid-cols-1 overflow-auto gap-2 md:grid-cols-3">
         {array.map((e) => 
         <div className="w-32 h-32 insidebox rounded-md shadow-inner">{e}</div>
         )}
@@ -104,7 +134,7 @@ export default function Home() {
         <div className="mx-auto flex flex-col  w-50 p-1 rounded-md text-center gap-4 md:w-62">
           <div className="text-left flex flex-col w-full gap-4 divide-y-2">Price
             <div className="flex flex-row gap-6 mx-auto text-white">
-              <input className="rounded-md text-center w-28 searchbg "  placeholder="C $0"></input>
+              <input className="rounded-md text-center w-28 searchbg "  placeholder="C $0" value={pricerange} onChange={zero}></input>
               <input className="rounded-md text-center w-28 searchbg " placeholder="C $∞"></input>
             </div>
           </div>
@@ -136,7 +166,7 @@ export default function Home() {
       </div>
       <div className="flex flex-col overflow-auto p-2 tradebox h-[85%] mt-3 rounded-md">
       <input className="w-full px-2 m-1 mb-2 mx-auto rounded-md searchbg " placeholder="⌕ Search"></input>
-      <div className="grid overflow-auto gap-2 grid-cols-1 md:grid-cols-4">
+      <div className="grid overflow-auto gap-2 grid-cols-1 md:grid-cols-3">
         {fakeItems.map((e) => 
           <div className={`${checkedGeneral ? `${checkedHeroes.includes(e.hero) ? 'w-32 h-32 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500' : 'hidden'}` : 'w-32 h-32 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500'}`}><Image src={e.imgurl} alt='img' width={90} height={90} className="mx-auto"></Image>
             <button className={`${inCart.includes(`${e.id}`)? 'text-white justify-end redhoveraccent w-full rounded-md' : 'text-white justify-end bg-zinc-600 w-full rounded-md transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>🛒</button>
