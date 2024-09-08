@@ -48,9 +48,16 @@ body {
   .redaccent {
     background-color: #DE4646;
   }
+  .redaccenttext {
+    color: #DE4646;
+  }
+
+  .redhoveraccenttext {
+    color: #e96969;
+  }
 
   .redhoveraccent {
-    background-color: #e96969;
+    color: #e96969;
   }
 
   .borderinsidebox {

@@ -106,9 +106,9 @@ console.log(bigRange)
   }
 
   return (
-    <main className="z-10 flex min-h-screen flex-row items-center bgblack gap-8 text-white overflow-auto">
-      <div className="flex flex-row mx-auto w-[85%]">
-      <div className="flex mx-auto h-screen w-full">
+    <main className="z-10 flex min-h-screen flex-col items-center bgblack gap-8 text-white overflow-auto">
+      <div className="flex flex-col mx-auto w-[85%] md:flex-row">
+      <div className="flex flex-col mx-auto h-screen w-full md:flex-row">
       <div className="flex-col w-full">
       <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-md">
         <div className="">You are getting:</div>
@@ -116,7 +116,12 @@ console.log(bigRange)
       </div>
       <div className="overflow-auto p-2 tradebox h-[85%] mt-3 rounded-md">
       <input className="w-full px-2 m-1 mb-2 mx-auto rounded-md searchbg" placeholder="⌕ Search"></input>
-      <div className="grid gap-2 items-grid">
+      <div className={`${signed? 'hidden' : 'flex flex-col visible mx-auto text-center gap-2 mt-20'}`}>
+        <div className="text-4xl">❗</div>
+        <div className="text-xl font-semibold">Please sign in with Steam</div>
+        <Link href="" className="redaccenttext mt-2 font-light hover:redhoveraccent">Sign in with Steam</Link>
+        </div>
+      <div className={`${signed? 'grid gap-2 items-grid' : 'hidden'}`}>
         {fakeItems.map((e) => 
           <div className={`${checkedGeneral ? `${checkedHeroes.includes(e.hero) && fakeItems.some(e => e.price < 100 && e.price > smallRange) ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500' : 'hidden'}` : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-blue-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
             <button className={`${inCart.includes(`${e.id}`)? 'text-white justify-end redhoveraccent w-full rounded-md' : 'w-full text-white h-fit justify-end bg-zinc-600 w-full rounded-md transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>ADD</button>
@@ -126,7 +131,7 @@ console.log(bigRange)
       </div>
       </div>
 
-      <div className="flex flex-col mx-5 rounded-md w-fit">
+      <div className="flex flex-col mx-auto py-10 rounded-md w-full order-last md:w-fit md:mx-5 md:py-0 md:order-none">
         <button className="mt-20 mx-auto rounded-md redaccent py-[10px] text-sm shadow-inner text-lg w-[65%]">TRADE</button>
         <div className="justify-between flex flex-col filterbg h-[85%] rounded-md p-2 mt-3 overflow-auto">
         <div className="mx-auto flex flex-col p-1 mt-3 rounded-md text-center gap-4">
@@ -159,7 +164,7 @@ console.log(bigRange)
         <button onClick={handleSendToApiFilter}></button>
       </div>
 
-      <div className="flex-col w-full">
+      <div className="flex-col w-full mt-4 md:mt-0">
       <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-md">
         <div className="">You are getting:</div>
         <div className="">C$ 21 🛒</div>
@@ -168,8 +173,8 @@ console.log(bigRange)
       <input className="w-full px-2 m-1 mb-2 mx-auto rounded-md searchbg" placeholder="⌕ Search"></input>
       <div className="grid gap-2 items-grid">
         {fakeItems.map((e) => 
-          <div className={`${checkedGeneral ? `${checkedHeroes.includes(e.hero) && fakeItems.some(e => e.price < 100 && e.price > smallRange) ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500' : 'hidden'}` : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-blue-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
-            <button className={`${inCart.includes(`${e.id}`)? 'text-white justify-end redhoveraccent w-full rounded-md' : 'w-full text-white h-fit justify-end bg-zinc-600 w-full rounded-md transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>🛒</button>
+          <div className={`${checkedGeneral ? `${checkedHeroes.includes(e.hero) && fakeItems.some(e => e.price < 100 && e.price > smallRange) ? 'flex flex-col h-full w-full pb-1 px-3 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500' : 'hidden'}` : 'flex flex-col h-full w-full px-3 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-blue-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
+            <button className={`${inCart.includes(`${e.id}`)? 'text-white justify-end redhoveraccent rounded-md' : 'text-white h-fit justify-end bg-zinc-600 w-full rounded-md transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>🛒</button>
           </div>
         )}
       </div>
