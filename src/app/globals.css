@@ -39,6 +39,9 @@ body {
   .insidebox {
     background-color: #232732;
   }
+  .cartbutton {
+    background-color: #343a4b;
+  }
   .searchbg {
     background-color: #2B2F3C;
   }
@@ -70,6 +73,20 @@ body {
     transform-origin: right;
     transform: translateX(0);
   }
+
+.animate-show-error {
+  transition: opacity 1s ease, transform 1s ease;
+  opacity: 1;
+  transform-origin: right;
+  transform: translateX(0);
+}
+
+.hiddenError {
+  transition: opacity 2s ease, transform 1s ease;
+  opacity: 0;
+  transform-origin: right;
+  transform: translateX(100%);
+}
   
   .hiddenLogin {
     transition: all 1s ease;
