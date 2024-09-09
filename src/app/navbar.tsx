@@ -75,7 +75,7 @@ export function Navbar() {
 
 
 	return (
-		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full ${heightCheck ? 'h-screen' : 'h-16'} md:h-16`}`}>
+		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 overflow-x-hidden`}`}>
 			<div className="invisible md:visible md:w-full flex justify-between text-sm">
       <div className="flex items-center space-x-10 ml-4">
 				<Link href="/" className="hover:cursor-pointer mr-6">

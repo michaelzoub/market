@@ -197,7 +197,7 @@ export default function Home() {
 
   return (
     <Profiler id='App' onRender={onRenderCallback}>
-    <main className="z-10 flex min-h-screen flex-col items-center bgblack gap-8 text-white overflow-auto">
+    <main className="z-10 flex min-h-screen flex-col items-center bgblack gap-8 text-white overflow-auto overflow-x-hidden">
       <div className="flex flex-col mx-auto w-[90%] md:flex-row md:w-[95%]">
       <div className="flex flex-col mx-auto h-screen w-full md:flex-row">
 
