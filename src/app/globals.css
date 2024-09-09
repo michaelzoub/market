@@ -63,6 +63,10 @@ body {
     color: #e96969;
   }
 
+  .svgcolorchange {
+    filter: invert(72%) sepia(90%) saturate(3291%) hue-rotate(319deg) brightness(99%) contrast(84%);
+  }
+
   .borderinsidebox {
     border-color: #232732;
   }

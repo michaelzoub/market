@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { Navbar } from "./navbar";
 
-const inter = Poppins({ subsets: ["latin"], weight: ["400"] }); //used to be Monda
+const inter = Poppins({ subsets: ["latin"], weight: ["400", "500"] }); //used to be Monda
 
 export const metadata: Metadata = {
   title: "Create Next App",

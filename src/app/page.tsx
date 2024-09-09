@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useState, useRef, Profiler, useMemo, memo } from 'react'
 import Link from "next/link";
+import Chatbot from "./components/helpchatbot";
 
 //this array would have ITEM name, image url, condition etc, price and add cart function
 const array = ['','','','','','','','','','','','','','','','','','','','','','','','','']
@@ -148,7 +149,7 @@ export default function Home() {
   }
 
   async function tradeFunctionality() {
-    if (!signed) {
+    if (signed) {
       setTradeError('TRADE FAILED; SIGN IN.')
       setTimeout(()=> {
         setTradeError('')
@@ -276,6 +277,7 @@ export default function Home() {
       </div>
       </div>
       </div>
+      <Chatbot />
     </main>
     </Profiler>
   );
