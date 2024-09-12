@@ -254,7 +254,7 @@ export default function Home() {
       <div className="flex-col w-full">
       <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-sm">
         <div className="">{/*You are giving:*/} {array[0]}</div>
-        <div className="whitespace-nowrap">{matchingObjectKey}{cartPrice} 🛒</div>
+        <div className="whitespace-nowrap">{matchingObjectKey}0 🛒</div>
       </div>
       <div className="overflow-auto p-2 tradebox h-[85%] mt-3 rounded-sm">
       <input className="w-full px-2 m-1 mb-2 mx-auto rounded-sm searchbg" placeholder={`${array[14]}`} onChange={itemSearch}></input>
