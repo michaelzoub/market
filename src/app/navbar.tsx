@@ -4,38 +4,36 @@ import Image from "next/image";
 import steam from '/public/steam-1.svg'
 import usa from '/public/United-states_flag_icon_round.svg.png'
 import brazil from '/public/Brazilian_Flag_-_round.svg.png'
-import spanish from '/public/Spain_flag_icon.svg.png'
+import china from '/public/china.png'
 import dlockbanner from '/public/bannerdlock.png'
-import { useState } from "react";
+import { useState, createContext, useContext } from "react";
 import { cookies } from "next/headers";
+import { LanguageContext } from "./components/LanguageContext";
+import { CurrencyContext } from "./components/CurrencyContext";
+import { languagesnavbar } from "./components/languages";
 
-export function Navbar() {
+export function Navbar({children}:any) {
 	//update language and currency method, useEffect -> set as cookie if exists, else 
 
 	const currencies = [
-		{ code: 'USD', symbol: '$' },
-		{ code: 'EUR', symbol: '€' },
-		{ code: 'GBP', symbol: '£' },
-		{ code: 'JPY', symbol: '¥' },
-		{ code: 'CAD', symbol: 'C$' },
-		{ code: 'AUD', symbol: 'A$' },
-		{ code: 'CHF', symbol: 'Fr' },
-		{ code: 'CNY', symbol: '¥' },
-		{ code: 'INR', symbol: '₹' },
-		{ code: 'BRL', symbol: 'R$' },
+		{ code: 'USD', symbol: '$', combo: 'USD $' },
+		{ code: 'EUR', symbol: '€', combo: 'EUR €' },
+		{ code: 'JPY', symbol: '¥', combo: 'JPY ¥' },
+		{ code: 'CNY', symbol: '¥', combo: 'CNY ¥' },
+		{ code: 'BRL', symbol: 'R$', combo: 'BRL R$' },
 	];
 
 	const languages = [
 		{ code: 'EN', name: 'English', flag: usa },
 		{ code: 'PT', name: 'Portuguese', flag: brazil },
-		{ code: 'ES', name: 'Spanish', flag: spanish },
+		{ code: 'CH', name: 'Chinese', flag: china },
 	];
 
 	const [openDropdown, setOpenDropdown] = useState<'language' | 'currency' | null>(null)
 	//use cookies
-	//React context for selected language
 	const [selectedCurrency, setSelectedCurrency] = useState(currencies[0])
-	const [selectedLanguage, setSelectedLanguage] = useState(languages[0])
+	const [selectedLanguage, setSelectedLanguage] = useState({ code: 'EN', name: 'English', flag: usa });
+	//const [selectedLanguage, setSelectedLanguage] = useState(languages[0])
   	const [loginClick, setLoginClick] = useState(false)
 
 	const toggleDropdown = (dropdown: 'language' | 'currency') => {
@@ -72,18 +70,34 @@ export function Navbar() {
       setLoginClick(true)
     }
 
+	let array: Array<String> = [];
+	let language = useContext(LanguageContext)
+	if (selectedLanguage.name === "English") {
+	  console.log('english hit')
+	  array = languagesnavbar.English
+	  console.log(array)
+	} if (selectedLanguage.name == "Portuguese") {
+	  console.log('portuguese hit')
+	  array = languagesnavbar.Portuguese
+	  console.log(array)
+	} if (selectedLanguage.name == "Chinese") {
+	  array = languagesnavbar.Chinese
+	}
+
 
 
 	return (
-		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 overflow-x-hidden`}`}>
+		<CurrencyContext.Provider value={selectedCurrency.combo}>
+		<LanguageContext.Provider value={selectedLanguage.name}>
+		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full overflow-x-hidden ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 md:overflow-visible`}`}>
 			<div className="invisible md:visible md:w-full flex justify-between text-sm">
       <div className="flex items-center space-x-10 ml-4">
 				<Link href="/" className="hover:cursor-pointer mr-6">
 					<Image src={dlockbanner} alt="Dlock Banner" width={140} height={60} />
 				</Link>
-				<Link href="/market" className="nav-tab font-bold pt-1 text-gray-500 text-sm">Market</Link>
-				<Link href="/trade" className="nav-tab font-bold pt-1 text-gray-500 text-sm">Trade</Link>
-				<Link href="/faq" className="nav-tab font-bold pt-1 text-gray-500 text-sm">FAQ</Link>
+				<Link href="/market" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[0]}</Link>
+				<Link href="/trade" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[1]}</Link>
+				<Link href="/faq" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[2]}</Link>
 			</div>
 			<div className="flex items-center mr-4">
 				<div className="relative">
@@ -179,5 +193,8 @@ export function Navbar() {
           </div>
       </div>
 		</nav>
+		{children}
+		</LanguageContext.Provider>
+		</CurrencyContext.Provider>
 	);
 }
