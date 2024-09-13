@@ -51,6 +51,9 @@ body {
   .redaccent {
     background-color: #DE4646;
   }
+  .statsbackground {
+    background: linear-gradient(to right, #1C1F29, #1C1F29);
+  }
   .redaccenttext {
     color: #DE4646;
   }
@@ -135,17 +138,23 @@ body {
   .container input:checked ~ .checkmark {
     background-color: #2196F3;
   }
-
-  .mq {
-    @media only screen and (max-width: 600px) {
-      body {
-        grid-template-columns: repeat(3, minmax(0, 1fr))
-      }
+  .loading {
+    position: absolute;
+    width: 96%;    
+    height: 65%; 
+    margin-left: auto;
+    margin-right: auto;
+    background: linear-gradient(90deg, #0F1117  25%, #422d2d 50%, #0F1117  75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite ease-in-out;
+    border-radius: 8px;
+  }
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
     }
-    @media only screen and (max-width: 400px) {
-      body {
-        grid-template-columns: repeat(2, minmax(0, 1fr))
-      }
+    100% {
+      background-position: -200% 0;
     }
   }
 

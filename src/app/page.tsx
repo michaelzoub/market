@@ -128,20 +128,27 @@ export default function Home() {
     }
   }
 
+  const userTradeObject = {
+    array: inCart,
+    loggedInUserSteamID: 'FakeID'
+  }
+
   async function tradeFunctionality() {
     if (signed) {
       setTradeError('TRADE FAILED; SIGN IN.')
       setTimeout(()=> {
         setTradeError('')
       }, 1500)
+    } if (inCart === null) {
+      console.log('Empty cart.')
     } else {
-      console.log('trade processing')
+      console.log('Trade processing')
       const response = await fetch('http://localhost:8080/api/trade', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(inCart) //sent as string (id)
+        body: JSON.stringify(userTradeObject) //sent as string (id)
       })
       response.body ? setTradeError('SUCCESS, PLEASE WAIT FOR TRADE BOT.') : setTradeError('NOT ENOUGH FUNDS.')
     }

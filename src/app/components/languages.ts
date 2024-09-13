@@ -56,16 +56,16 @@ export const languagesnavbar = {
     "English": [
         "Market",
         "Trade",
-        "FAQ"
+        "Stats"
     ],
     "Portuguese": [
         "Mercado",
-        "Troca",
-        "Perguntas Frequentes"
+        "Comércio",
+        "Estatísticas"
     ],
     "Chinese": [
-        "市场",
-        "交易",
-        "常见问题"
+        "市场",   // Shìchǎng (Market)
+        "交易",   // Jiāoyì (Trade)
+        "统计"    // Tǒngjì (Stats)
     ]
-}
+};

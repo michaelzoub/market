@@ -97,7 +97,7 @@ export function Navbar({children}:any) {
 				</Link>
 				<Link href="/market" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[0]}</Link>
 				<Link href="/trade" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[1]}</Link>
-				<Link href="/faq" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[2]}</Link>
+				<Link href="/components/statsimage" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[2]}</Link>
 			</div>
 			<div className="flex items-center mr-4">
 				<div className="relative">
