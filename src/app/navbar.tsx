@@ -91,8 +91,8 @@ export function Navbar({children}:any) {
 		<LanguageContext.Provider value={selectedLanguage.name}>
 		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full overflow-x-hidden ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 md:overflow-visible`}`}>
 			<div className="invisible md:visible md:w-full flex justify-between text-sm">
-      <div className="flex items-center space-x-10 ml-4">
-				<Link href="/" className="hover:cursor-pointer mr-6">
+      <div className="flex items-center space-x-6 ml-4">
+				<Link href="/" className="hover:cursor-pointer mr-2">
 					<Image src={dlockbanner} alt="Dlock Banner" width={140} height={60} />
 				</Link>
 				<Link href="/market" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[0]}</Link>
@@ -168,8 +168,9 @@ export function Navbar({children}:any) {
 						</div>
 					)}
 				</div>
-				<button onClick={loginClickHandle} className="login-button flex items-center px-6 py-2 text-sm font-bold">
-					<Image src={steam} alt='steam' width={20} height={20} className="mr-2 invert" />
+				<Link href="/payment" className="login-button flex items-center py-1 px-4 text-sm font-bold border-2 border-green-400 mx-2">Deposit</Link>
+				<button onClick={loginClickHandle} className="login-button flex items-center px-4 py-1 text-sm font-bold border-2 border-red-400 rounded-sm">
+					<Image src={steam} alt='steam' width={20} height={20} className="mr-1 invert" />
 					Login
 				</button>
 			</div>

@@ -1,3 +1,5 @@
+
+//main page languages, add other page languages (like payment or statsimage page)
 export const languages = {
     "English": [
         "You are giving:",

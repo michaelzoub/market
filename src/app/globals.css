@@ -48,6 +48,9 @@ body {
   .filterbg {
     background-color: #1C1F29;
   }
+  .hoversearchbg {
+    background-color: #333842;
+  }
   .redaccent {
     background-color: #DE4646;
   }
@@ -84,22 +87,22 @@ body {
 .animate-show-error {
   transition: opacity 1s ease, transform 1s ease;
   opacity: 1;
-  transform-origin: right;
-  transform: translateX(0);
+  transform-origin: left;
+  transform: translateX(10%);
 }
 
 .hiddenError {
   transition: opacity 2s ease, transform 1s ease;
   opacity: 0;
-  transform-origin: right;
-  transform: translateX(100%);
+  transform-origin: left;
+  transform: translateX(0);
 }
   
   .hiddenLogin {
     transition: all 1s ease;
     opacity: 0;
     transform-origin: right;
-    transform: translateX(100%);
+    transform: translateX(-300px);
   }
 
   .navbarblur {

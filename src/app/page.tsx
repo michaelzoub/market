@@ -99,7 +99,7 @@ export default function Home() {
 
   async function handleSendToApiFilter() {
     console.log(checkedHeroes)
-    const response = await fetch('http://localhost:8080/api/filterFunc', {
+    const response = await fetch('http://localhost:8080/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -129,20 +129,24 @@ export default function Home() {
   }
 
   const userTradeObject = {
-    array: inCart,
-    loggedInUserSteamID: 'FakeID'
+    cartValue: Number(cartPrice),
+    loggedInSteamId: "TestId"
   }
 
   async function tradeFunctionality() {
+    setTradeError('')
+    setTimeout(()=> {
+      setTradeError('')
+    }, 3000)
     if (signed) {
       setTradeError('TRADE FAILED; SIGN IN.')
-      setTimeout(()=> {
-        setTradeError('')
-      }, 1500)
-    } if (inCart === null) {
-      console.log('Empty cart.')
     } else {
+      if (cartPrice === 0) {
+        setTradeError("Empty cart.")
+        return 0
+      } else {
       console.log('Trade processing')
+      console.log(cartPrice)
       const response = await fetch('http://localhost:8080/api/trade', {
         method: 'POST',
         headers: {
@@ -150,7 +154,17 @@ export default function Home() {
         },
         body: JSON.stringify(userTradeObject) //sent as string (id)
       })
-      response.body ? setTradeError('SUCCESS, PLEASE WAIT FOR TRADE BOT.') : setTradeError('NOT ENOUGH FUNDS.')
+      if (response.ok) {
+        const res = await response.text()
+        if (res === 'false') {
+          setTradeError("Error, missing funds.")
+        } else {
+          setTradeError("Success, waiting for bot.")
+        }
+      } else {
+        setTradeError("Error, internal server.")
+        }
+      }
     }
   }
 
@@ -270,7 +284,6 @@ export default function Home() {
         <div className="text-xl font-semibold">{array[1]}</div>
         <Link href="" className="redaccenttext mt-2 font-light hover:redhoveraccent">{array[2]}</Link>
         </div>
-        <div className={`${tradeError ? 'mt-10 animate-show-error w-fit px-1 py-2 my-auto mx-auto justify-center items-center bg rounded-sm border-[1px] border-red-700 redaccent font-semibold text-sm' : 'mt-10 hiddenError'}`}>{tradeError}</div>
       <div className={`${signed? 'grid gap-2 items-grid' : 'hidden'}`}>
         {fakeItems.map((e) => 
           <div className={`${checkedGlobal ? `${checkedHeroes.includes(e.hero) && e.price >= smallRange || e.price <= bigRange ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500' : 'hidden'}` : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-blue-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
@@ -279,6 +292,7 @@ export default function Home() {
         )}
       </div>
       </div>
+      <div className={`${tradeError ? 'absolute start-0 mt-[-29px] animate-show-error w-fit px-1 py-2 my-auto mx-auto justify-center items-center rounded-sm border-[1px] border-red-700 redaccent font-semibold text-sm' : 'right-[-100px] mt-10 hiddenError'}`}>{tradeError}</div>
       </div>
 
       <div className="flex flex-col mx-auto py-10 pb-36 rounded-sm w-full order-last md:w-fit md:mx-5 md:py-0 md:order-none md:mb-0">
