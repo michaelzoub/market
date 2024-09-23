@@ -11,6 +11,7 @@ import { cookies } from "next/headers";
 import { LanguageContext } from "./components/LanguageContext";
 import { CurrencyContext } from "./components/CurrencyContext";
 import { languagesnavbar } from "./components/languages";
+import Deposit from "./components/depositmodal";
 
 export function Navbar({children}:any) {
 	//update language and currency method, useEffect -> set as cookie if exists, else 
@@ -84,6 +85,8 @@ export function Navbar({children}:any) {
 	  array = languagesnavbar.Chinese
 	}
 
+	const [deposit, setDeposit] = useState(false)
+
 
 
 	return (
@@ -91,6 +94,7 @@ export function Navbar({children}:any) {
 		<LanguageContext.Provider value={selectedLanguage.name}>
 		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full overflow-x-hidden ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 md:overflow-visible`}`}>
 			<div className="invisible md:visible md:w-full flex justify-between text-sm">
+
       <div className="flex items-center space-x-6 ml-4">
 				<Link href="/" className="hover:cursor-pointer mr-2">
 					<Image src={dlockbanner} alt="Dlock Banner" width={140} height={60} />
@@ -168,8 +172,8 @@ export function Navbar({children}:any) {
 						</div>
 					)}
 				</div>
-				<Link href="/payment" className="login-button flex items-center py-1 px-4 text-sm font-bold border-2 border-green-400 mx-2">Deposit</Link>
-				<button onClick={loginClickHandle} className="login-button flex items-center px-4 py-1 text-sm font-bold border-2 border-red-400 rounded-sm">
+				{/* used to be Link href="/payment" */}<Link href="/payment" className="z-10 login-button flex items-center py-1 px-4 text-sm font-bold mx-2" onClick={() => setDeposit(true)}>Deposit</Link>
+				<button onClick={loginClickHandle} className="login-button flex items-center px-4 py-1 text-sm font-bold rounded-sm">
 					<Image src={steam} alt='steam' width={20} height={20} className="mr-1 invert" />
 					Login
 				</button>

@@ -46,6 +46,8 @@ export default function Home() {
   const [searchFilter, setSearchFilter] = useState<string[]>([])
   const [searchCondition, setSearchCondition] = useState(false)
 
+  const [qmarkClicked, setQmarkClicked] = useState(false)
+
   //Profiler, check speed:
   function onRenderCallback(
     id:any, 
@@ -66,7 +68,7 @@ export default function Home() {
   }
 
   const isPriceInRange = (price: number) => {
-    return (bigRange > 0 || smallRange > 0) ? (price < bigRange && price > smallRange) : true;
+    return (bigRange > 0 || smallRange > 0) ? (price <= bigRange && price >= smallRange) : true;
   };
   
   const matchesFilters = (hero: string) => {
@@ -347,7 +349,8 @@ export default function Home() {
       </div>
       </div>
       </div>
-      <Chatbot />
+      <div className={`${qmarkClicked ? `hidden` : `rounded-full text-black absolute end-0 bottom-0 m-2 w-12 h-12 redaccent overflow-hidden helpping`}`} onMouseEnter={() => setQmarkClicked(true)}></div>
+      <Chatbot onClick={() => setQmarkClicked(true)}/>
     </main>
     </Profiler>
   );

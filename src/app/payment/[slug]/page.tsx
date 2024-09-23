@@ -4,8 +4,7 @@ import { paymentOptions } from "@/app/components/paymentdata"
 import { cryptoOptions } from "@/app/components/paymentdata"
 import { CurrencyContext } from "@/app/components/CurrencyContext"
 import { steamMarketCurrencies } from "@/app/components/SteamMarketCurrencies"
-import { useContext } from "react"
-import { useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import Image from "next/image"
 import qr from "/public/qr.svg"
 
@@ -20,15 +19,15 @@ interface cryptoType {
 const fakeTxData = [
     {
         date: "2024-10-01",
-        amount: 120.0
+        amount: 1.1
     },
     {
         date: "2024-10-01",
-        amount: 120.0   
+        amount: 2.0   
     },
     {
         date: "2024-10-01",
-        amount: 1220.0
+        amount: 3.0
     },
     {
         date: "2024-10-01",
@@ -52,20 +51,90 @@ const fakeTxData = [
     },
 ]
 
-const itemsPerPage = 6
+const itemsPerPage = 1;
 
 export default function paymentSlug({ params }: any) {
-    const [page, setPage] = useState(0) //page number starts at page 0
     const totalPages = Math.ceil(fakeTxData.length / itemsPerPage) //number for total amount of pages
+    const [center, setCenter] = useState(Math.ceil(totalPages / 2))
+    const [page, setPage] = useState(0)
+    const [over, setOver] = useState(false)
     //start index would be the itemsPerPage times page
     const startIndex = itemsPerPage * page
     const paginatedData = fakeTxData.slice(startIndex, startIndex + itemsPerPage);
+
+    useEffect(() => {
+        if (totalPages <= 4) {
+            setOver(true)
+        }
+    },[])
+    
+    let parsedPages: any = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+        parsedPages.push(i)
+    }
+
+    function performSelectSelection(e:any) {
+        const target = e.target.value
+        setPage(e.target.value - 1)
+    }
+
+    function rightPage(e:any) {
+        if (e.target.value >= totalPages - 1) {
+            if (e.target.value > totalPages - 1) {
+
+            } else {
+                setPage(e.target.value - 1)
+            }
+        } else {
+            setPage(e.target.value - 1)
+            let plus = center + 1
+            setCenter(plus)
+        }
+    }
+
+    function leftPage(e:any) {
+        if (e.target.value <= 2) {
+            if (e.target.value < 2) {
+
+            } else {
+                setPage(e.target.value - 1)
+            }
+        } else {
+            setPage(e.target.value - 1)
+            let minus = center - 1
+            setCenter(minus)
+        }
+    }
+
+    function first(e:any) {
+        setPage(e.target.value - 1)
+        if (totalPages < 5) {
+            setCenter(2)
+        } else {
+            setCenter(3)
+        }
+    }
+
+    function last(e:any) {
+        setPage(e.target.value - 1)
+        if (totalPages < 5) {
+            if (over) {
+                setCenter(totalPages - 2)
+            } else {
+                setCenter(totalPages - 1)
+            }
+        } else {
+            setCenter(totalPages - 2)
+        }
+    }
 
     async function sendToBackendForProcessing() {
 
     }
 
     let e1 = 1;
+    let centerCalc = Math.ceil(totalPages / 2)
 
     let payment: any;
 
@@ -94,24 +163,34 @@ export default function paymentSlug({ params }: any) {
                 <Image className="bg-white rounded-sm mx-auto" src={qr} width={200} alt="qr"></Image>
                 <div className="mx-auto mt-4 border-2 rounded-sm border-zinc-400 p-1">Transfer only ${payment.name} to this address</div>
             </div>
-            <div className="w-full shadow-inner rounded-sm tradebox flex flex-col gap-2 p-4">
+            <div className="w-full shadow-inner rounded-sm bgblack flex flex-col gap-2 p-4">
                 <div className="text-2xl font-medium">Transaction History:</div>
                 <div className="grid grid-cols divide-y-[1px]">
+                <div className="flex flex-row justify-between text-zinc-300 my-2">
+                    <div>Type</div>
+                    <div>Amount</div>
+                    <div>Date</div>
+                </div>
                 {
                     paginatedData.map((e) => 
                     <div className="flex flex-row justify-between p-1 rounded-sm">
-                        <div className="text-red-200 text-left">Tx: {e1++}</div>
-                        <div className="w-32 pl-4 text-left">{e.amount} {matchingObjectKey}</div>
-                        <div className="">{e.date}</div>
+                        <div className="text-red-400 text-left">Sell</div>
+                        <div className="w-52 pl-24 text-left">{e.amount} {matchingObjectKey}</div>
+                        <div className="text-zinc-300">{e.date}</div>
                     </div>
                 )
                 }
                 </div>
                 <div className="flex flex-row mx-auto gap-4">
-                    <button onClick={() => setPage((e) => e - 1)} className="rounded-sm px-1 bg-red-400 text-black">←</button>
-                    <button onClick={() => setPage((e) => e + 1)} className="rounded-sm px-1 bg-red-400 text-black">➜</button>
+                                <button className="rounded-md bg-red-400 p-2 w-fit" onClick={first} value={1}>First</button>
+                                <div className="flex flex-row gap-2">
+                                    <button className={`${over ? "hidden" : "rounded-md bg-red-400 p-2 w-7"}`} onClick={leftPage} value={center - 1}>{center - 1}</button>
+                                    <button className="rounded-md bg-red-400 p-2 w-7" onClick={(e:any) => setPage(e.target.value - 1)} value={center}>{center}</button>
+                                    <button className="rounded-md bg-red-400 p-2 w-7" onClick={rightPage} value={center + 1}>{center + 1}</button>
+                                </div>
+                                <button className="rounded-md bg-red-400 p-2 w-fit" onClick={last} value={totalPages}>Last</button>
                 </div>
-                <div className="mx-auto">Page {page + 1} / {totalPages}</div>
+                <div className="text-sm text-zinc-400 mx-auto m-2">Page {page + 1} - {totalPages}</div>
             </div>
         </main>
     )

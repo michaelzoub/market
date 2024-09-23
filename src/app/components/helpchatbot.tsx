@@ -12,7 +12,7 @@ interface Message {
 
 const commonlyAskedQuestion = ["Why should I trade on dlock?", "How long does it take to receive items?", "What is the cashout limit?"]
 
-export default function Chatbot() {
+export default function Chatbot(click: any) {
     const [text, setText] = useState('')
     const [iconClicked, setIconClicked] = useState(false)
     const [messages, setMessages] = useState<Message[]>([])

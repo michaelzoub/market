@@ -90,7 +90,20 @@ body {
   transform-origin: left;
   transform: translateX(10%);
 }
-
+.animate-show-depositRight {
+  transition: all 1s ease;
+  opacity: 1;
+  transform-origin: right;
+  position: absolute;
+  right: 0;
+  transform: translateX(0)
+}
+.animate-show-depositLeft {
+  transition: all 1s ease;
+  opacity: 1;
+  transform-origin: left;
+  transform: translateX(0);
+}
 .hiddenError {
   transition: opacity 2s ease, transform 1s ease;
   opacity: 0;
@@ -102,6 +115,19 @@ body {
     transition: all 1s ease;
     opacity: 0;
     transform-origin: right;
+    transform: translateX(-300px);
+  }
+  .hiddenDepositRight {
+    transition: all 1s ease;
+    opacity: 0;
+    transform-origin: right;
+    transform: translateX(100%)
+  }
+
+  .hiddenDepositLeft {
+    transition: all 1s ease;
+    opacity: 0;
+    transform-origin: left;
     transform: translateX(-300px);
   }
 
@@ -140,6 +166,15 @@ body {
 
   .container input:checked ~ .checkmark {
     background-color: #2196F3;
+  }
+  .helpping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
   }
   .loading {
     position: absolute;

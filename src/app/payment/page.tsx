@@ -31,7 +31,7 @@ export default function Payment() {
                     )}
                 </div>
             </div>
-            <div className="w-full">
+            <div className="w-full mb-8">
                 <div className="text-lg my-4">Crypto</div>
                 <div className="grid gap-2 items-grid flex flex-row">
                     {cryptoOptions.map((e) => 
