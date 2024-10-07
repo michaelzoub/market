@@ -30,6 +30,7 @@ export default function Home() {
   const [filterGlobal, setFilterGlobal] = useState(false) //checks wether user is filtering
   const [filterPlus, setFilterplus] = useState(false)
   const [filterRarity, setFilterRarity] = useState(false)
+  const [filterCart, setFilterCart] = useState(false)
   const [signed, setSigned] = useState(false)
   const [tradeError, setTradeError] = useState('')
 
@@ -94,11 +95,6 @@ export default function Home() {
     hero: checkedHeroes
   }
 
-  async function signedIn() {
-    //verify if user is signed in through cookies
-    setSigned(true)
-  }
-
   async function handleSendToApiFilter() {
     console.log(checkedHeroes)
     const response = await fetch('http://localhost:8080/', {
@@ -113,6 +109,7 @@ export default function Home() {
     console.log(response.body)
   }
 
+  //add in cart items to cookies
   function addToCart(e: any) {
     let temp = e.target.value 
     let parsed = parseInt(temp)
@@ -128,6 +125,12 @@ export default function Home() {
       const price: any = find?.price
       setCartPrice((e) => e + price)
     }
+  }
+
+  function filterByInCart() {
+    setFilterGlobal(true)
+    setCheckedGlobal(true)
+    setCheckedHeroes(inCart)
   }
 
   const userTradeObject = {
@@ -262,10 +265,14 @@ export default function Home() {
       let currencyContext = useContext(CurrencyContext)
       let matchingObjectKey = currencyObjectKeys.filter((e) => e === currencyContext)
 
+      const [time, setTime] = useState(1)
+      const [test, setTest]:any = useState(false)
+
       useEffect(()=> {
         console.log(language.toString())
         console.log(matchingObjectKey)
       }, [])
+
 
 
   return (
@@ -273,8 +280,7 @@ export default function Home() {
     <main className="z-10 flex min-h-screen flex-col items-center bgblack gap-8 text-white overflow-auto overflow-x-hidden">
       <div className="flex flex-col mx-auto w-[90%] md:flex-row md:w-[95%]">
       <div className="flex flex-col mx-auto h-screen w-full md:flex-row">
-
-      <div className="flex-col w-full">
+      <div className="flex-col w-full fade-in-largecontainer">
       <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-sm">
         <div className="">{/*You are giving:*/} {array[0]}</div>
         <div className="whitespace-nowrap">{matchingObjectKey}0 🛒</div>
@@ -297,7 +303,7 @@ export default function Home() {
       <div className={`${tradeError ? 'absolute start-0 mt-[-29px] animate-show-error w-fit px-1 py-2 my-auto mx-auto justify-center items-center rounded-sm border-[1px] border-red-700 redaccent font-semibold text-sm' : 'right-[-100px] mt-10 hiddenError'}`}>{tradeError}</div>
       </div>
 
-      <div className="flex flex-col mx-auto py-10 pb-36 rounded-sm w-full order-last md:w-fit md:mx-5 md:py-0 md:order-none md:mb-0">
+      <div className="fade-in-rest flex flex-col mx-auto py-10 pb-36 rounded-sm w-full order-last md:w-fit md:mx-5 md:py-0 md:order-none md:mb-0">
         <button onClick={tradeFunctionality} className="mt-20 mx-auto rounded-sm redaccent py-[10px] text-sm shadow-inner text-lg w-[65%]">{array[4]}</button>
         <div className="justify-between flex flex-col h-[85%] rounded-sm p-2 mt-3 overflow-auto">
         <div className="w-full mx-auto flex flex-col p-1 mt-3 rounded-sm text-center gap-4">
@@ -330,7 +336,7 @@ export default function Home() {
         <button onClick={handleSendToApiFilter}></button>
       </div>
 
-      <div className="flex-col w-full mt-4 md:mt-0">
+      <div className="flex-col w-full mt-4 md:mt-0 fade-in-largecontainer">
       <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-sm">
         <div className="">{array[13]}</div>
         <div className="whitespace-nowrap">{matchingObjectKey}{cartPrice} 🛒</div>

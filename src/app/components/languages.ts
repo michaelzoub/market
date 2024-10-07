@@ -16,7 +16,7 @@ export const languages = {
         "Exotic",
         "Clear",
         "You are getting:",
-        "⌕ Search" //array [14]
+        "⌕ Search" // array [14]
     ],
     "Portuguese": [
         "Você está oferecendo:",

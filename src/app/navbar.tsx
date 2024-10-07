@@ -6,23 +6,16 @@ import usa from '/public/United-states_flag_icon_round.svg.png'
 import brazil from '/public/Brazilian_Flag_-_round.svg.png'
 import china from '/public/china.png'
 import dlockbanner from '/public/bannerdlock.png'
-import { useState, createContext, useContext } from "react";
-import { cookies } from "next/headers";
+import { useState, useContext, useEffect } from "react";
 import { LanguageContext } from "./components/LanguageContext";
 import { CurrencyContext } from "./components/CurrencyContext";
+import { UserprofilepicContext, UsernameContext } from '@/app/components/UserContext'
 import { languagesnavbar } from "./components/languages";
 import Deposit from "./components/depositmodal";
+import { authorizationUrl } from "./service/openid";
 
 export function Navbar({children}:any) {
 	//update language and currency method, useEffect -> set as cookie if exists, else 
-
-	const currencies = [
-		{ code: 'USD', symbol: '$', combo: 'USD $' },
-		{ code: 'EUR', symbol: '€', combo: 'EUR €' },
-		{ code: 'JPY', symbol: '¥', combo: 'JPY ¥' },
-		{ code: 'CNY', symbol: '¥', combo: 'CNY ¥' },
-		{ code: 'BRL', symbol: 'R$', combo: 'BRL R$' },
-	];
 
 	const languages = [
 		{ code: 'EN', name: 'English', flag: usa },
@@ -31,11 +24,13 @@ export function Navbar({children}:any) {
 	];
 
 	const [openDropdown, setOpenDropdown] = useState<'language' | 'currency' | null>(null)
-	//use cookies
-	const [selectedCurrency, setSelectedCurrency] = useState(currencies[0])
 	const [selectedLanguage, setSelectedLanguage] = useState({ code: 'EN', name: 'English', flag: usa });
-	//const [selectedLanguage, setSelectedLanguage] = useState(languages[0])
   	const [loginClick, setLoginClick] = useState(false)
+	const [path, setPath] = useState("")
+	const [loggedInUsername, setLoggedInUsername] = useState("")
+	const [loggedInPfp, setLoggedInPfp] = useState("")
+	const [loggedInBalance, setLoggedInBalance] = useState("")
+	const [openProfileSettings, setOpenProfileSettings] = useState(false)
 
 	const toggleDropdown = (dropdown: 'language' | 'currency') => {
 		setOpenDropdown(openDropdown === dropdown ? null : dropdown)
@@ -45,10 +40,44 @@ export function Navbar({children}:any) {
   const [showBar, setShowBar] = useState(false)
   const [heightCheck, setHeightCheck] = useState(false)
 
-	function performLanguageChangeSetCookies() {
-		//set cookie (language)
-	}
+  const username = useContext(UsernameContext)
 
+	useEffect(() => {
+
+		setPath(window.location.pathname)
+
+		async function fetchCookies() {
+			const response = await fetch("http://localhost:8080/api/usercookies", {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				credentials: 'include',
+			})
+			const body = await response.json()
+			console.log('response:', body)
+			const splitUsername = body[0]
+			setLoggedInUsername(splitUsername)
+			setLoggedInPfp(body[1])
+			setLoggedInBalance(body[2])
+		}
+
+		if (window.location.pathname.includes('/auth/callback') || window.location.pathname.includes('')) {
+			console.log('Window.location works')
+			fetchCookies()
+	
+		}
+		
+	}, [location.pathname])
+
+	async function clearCookies() {
+		const response = await fetch("http://localhost:8080/api/clearcookies", {
+			method: 'POST',
+			credentials: 'include'
+		})
+		const body = await response.json()
+		console.log('cleared cookies:', body)
+	}
 
     function sideBar() {
       if (sidebar) {
@@ -66,10 +95,6 @@ export function Navbar({children}:any) {
     }
     }
 
-    function loginClickHandle() {
-      //perform api handling
-      setLoginClick(true)
-    }
 
 	let array: Array<String> = [];
 	let language = useContext(LanguageContext)
@@ -90,10 +115,12 @@ export function Navbar({children}:any) {
 
 
 	return (
-		<CurrencyContext.Provider value={selectedCurrency.combo}>
+		<UserprofilepicContext.Provider value="test">
+		<CurrencyContext.Provider value="$USD">
+		<UsernameContext.Provider value={loggedInUsername}>
 		<LanguageContext.Provider value={selectedLanguage.name}>
 		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full overflow-x-hidden ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 md:overflow-visible`}`}>
-			<div className="invisible md:visible md:w-full flex justify-between text-sm">
+			<div className="fade-in-navbar z-10 invisible md:visible md:w-full flex justify-between text-sm">
 
       <div className="flex items-center space-x-6 ml-4">
 				<Link href="/" className="hover:cursor-pointer mr-2">
@@ -103,80 +130,25 @@ export function Navbar({children}:any) {
 				<Link href="/trade" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[1]}</Link>
 				<Link href="/components/statsimage" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[2]}</Link>
 			</div>
-			<div className="flex items-center mr-4">
-				<div className="relative">
-					<button 
-						className="flex items-center mx-4 text-gray-500 hover:text-white transition-colors duration-200" 
-						onClick={() => toggleDropdown('language')}
-					>
-						<Image src={selectedLanguage.flag} alt={selectedLanguage.name} width={25} height={25} className="mr-2" />
-						<span className="mr-1">{selectedLanguage.code}</span>
-						<svg 
-							className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'language' ? 'rotate-180' : ''}`} 
-							fill="none" 
-							stroke="currentColor" 
-							viewBox="0 0 24 24" 
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+			<div className="flex items-center mr-2">
+				<Link href="/payment" className="z-10 login-button redaccent rounded-sm py-[7px] flex items-center w-20 justify-center text-sm mx-1" onClick={() => setDeposit(true)}>Deposit</Link>
+				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[7px] flex items-center w-20 justify-center text-sm mx-1 text-zinc-300" onClick={() => console.log('add withdraw')}>Withdraw</Link>
+				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[7px] flex items-center w-12 justify-center text-sm mx-2 text-zinc-300" onClick={() => setDeposit(true)}>${loggedInBalance?.includes("null") ? '0' : loggedInBalance}</Link>
+				<Link href={`${!loggedInUsername.includes("null")? '/' : authorizationUrl}`} className={`${!loggedInUsername.includes("null") ? "login-button searchbg flex items-center mx-3 w-16 py-1 text-sm font-bold rounded-sm" : "login-button flex items-center mx-3 w-16 py-1 text-sm font-bold rounded-sm"}`}>
+					<Image src={steam} alt='steam' width={20} height={20} className={`${!loggedInUsername.includes("null") ? "hidden" : "mr-1 invert"}`} />
+					{!loggedInUsername.includes("null") ? <Image src={loggedInPfp.includes("null") ? '' : loggedInPfp} alt="User's profile picture" width={30} height={30} className="rounded-sm my-auto mx-[3px]"></Image> : 'Login'}
+					<button className={`${!loggedInUsername.includes("null") ? 'visible mx-2' : 'hidden'}`} onClick={() => setOpenProfileSettings((prev:any) => !prev)}>
+						<svg className="visible mt-4 mr-1" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+							<polyline points="0,0 9,6 18,0" fill="none" stroke="white" strokeWidth="2"></polyline>
 						</svg>
-					</button>
-					{openDropdown === 'language' && (
-						<div className="absolute mt-2 w-40 bg-[#1C1F29] rounded-md shadow-lg py-1 text-gray-500">
-							{languages.map((language, index) => (
-								<button 
-									key={index} 
-									className="flex items-center w-full px-4 py-2 text-left hover:bg-gray-700 hover:text-white transition-colors duration-200"
-									onClick={() => {
-										setSelectedLanguage(language);
-										setOpenDropdown(null);
-									}}
-								>
-									<Image src={language.flag} alt={language.name} width={20} height={20} className="mr-2" />
-									{language.name}
-								</button>
-							))}
+						<div className={`${openProfileSettings ? "flex flex-col absolute gap-1 mt-2 mx-auto rounded-sm font-medium" : "hidden"}`}>
+							<div>testing</div>
+							<button onClick={clearCookies}>Logout</button>
 						</div>
-					)}
-				</div>
-				<div className="relative">
-					<button 
-						className="flex items-center mx-4 text-gray-500 hover:text-white transition-colors duration-200" 
-						onClick={() => toggleDropdown('currency')}
-					>
-						<span className="mr-1">{selectedCurrency.code}</span>
-						<svg 
-							className={`w-4 h-4 transition-transform duration-200 ${openDropdown === 'currency' ? 'rotate-180' : ''}`} 
-							fill="none" 
-							stroke="currentColor" 
-							viewBox="0 0 24 24" 
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-						</svg>
+						<div className="hidden">{loggedInBalance}</div>
 					</button>
-					{openDropdown === 'currency' && (
-						<div className="absolute mt-2 w-32 bg-[#1C1F29] rounded-md shadow-lg py-1 text-gray-500">
-							{currencies.map((currency, index) => (
-								<button 
-									key={index} 
-									className="flex items-center w-full px-4 py-2 text-left hover:bg-gray-700 hover:text-white transition-colors duration-200"
-									onClick={() => {
-										setSelectedCurrency(currency);
-										setOpenDropdown(null);
-									}}
-								>
-									{currency.code} {currency.symbol}
-								</button>
-							))}
-						</div>
-					)}
-				</div>
-				{/* used to be Link href="/payment" */}<Link href="/payment" className="z-10 login-button flex items-center py-1 px-4 text-sm font-bold mx-2" onClick={() => setDeposit(true)}>Deposit</Link>
-				<button onClick={loginClickHandle} className="login-button flex items-center px-4 py-1 text-sm font-bold rounded-sm">
-					<Image src={steam} alt='steam' width={20} height={20} className="mr-1 invert" />
-					Login
-				</button>
+
+				</Link>
 			</div>
       </div>
 
@@ -186,10 +158,10 @@ export function Navbar({children}:any) {
             <div className={`${sidebar? 'z-10 flex flex-row h-screen justify-end w-full transition ease-in-out delay-150 backdrop-blur' : 'w-full navbarblur'}`}>
             <div className={`${showBar? 'z-10 flex flex-col gap-4 animate-show w-[100%] tradebox h-screen pt-14 text-left px-4' : 'hiddenLogin flex flex-col gap-4 w-[100%] h-screen tradebox pt-14 px-4'}`}>
               <div className="mx-auto flex flex-row text-xl hover:cursor-pointer font-bold">d<span className="text-red-500">lock</span>.shop</div>
-              <button onClick={loginClickHandle} className="login-button flex items-center px-6 py-2 text-sm font-bold mx-auto hover:redhoveraccenttext">
+              <Link href="/service/api/auth/login" className="login-button flex items-center px-6 py-2 text-sm font-bold mx-auto hover:redhoveraccenttext">
 					      <Image src={steam} alt='steam' width={20} height={20} className="mr-2 invert" />
 					      Login
-			  </button>
+			  </Link>
               <div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Market</div>
               <div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Trade</div>
               <div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">FAQ</div>
@@ -200,6 +172,8 @@ export function Navbar({children}:any) {
 		</nav>
 		{children}
 		</LanguageContext.Provider>
+		</UsernameContext.Provider>
 		</CurrencyContext.Provider>
+		</UserprofilepicContext.Provider>
 	);
 }

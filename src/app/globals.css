@@ -60,30 +60,24 @@ body {
   .redaccenttext {
     color: #DE4646;
   }
-
   .redhoveraccenttext {
     color: #e96969;
   }
-
   .redhoveraccent {
     color: #e96969;
   }
-
   .svgcolorchange {
     filter: invert(72%) sepia(90%) saturate(3291%) hue-rotate(319deg) brightness(99%) contrast(84%);
   }
-
   .borderinsidebox {
     border-color: #232732;
   }
-
   .animate-show {
     transition: all 1s ease;
     opacity: 1;
     transform-origin: right;
     transform: translateX(0);
   }
-
 .animate-show-error {
   transition: opacity 1s ease, transform 1s ease;
   opacity: 1;
@@ -91,7 +85,7 @@ body {
   transform: translateX(10%);
 }
 .animate-show-depositRight {
-  transition: all 1s ease;
+  transition: all 0.5s ease;
   opacity: 1;
   transform-origin: right;
   position: absolute;
@@ -110,7 +104,6 @@ body {
   transform-origin: left;
   transform: translateX(0);
 }
-  
   .hiddenLogin {
     transition: all 1s ease;
     opacity: 0;
@@ -123,26 +116,27 @@ body {
     transform-origin: right;
     transform: translateX(100%)
   }
-
   .hiddenDepositLeft {
     transition: all 1s ease;
     opacity: 0;
     transform-origin: left;
     transform: translateX(-300px);
   }
-
   .navbarblur {
     transition: all 1.2s ease;
     opacity: 0;
     z-index: -1;
   }
-
   .items-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     grid-column-gap: 8px;
     grid-row-gap: 10px;
   }
-
+  .prices-grid {
+    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    grid-column-gap: 6px;
+    grid-row-gap: 10px;
+  }
   .container input {
     position: absolute;
     opacity: 0;
@@ -150,7 +144,6 @@ body {
     height: 0;
     width: 0;
   }
-
   .checkmark {
     position: absolute;
     top: 0;
@@ -195,7 +188,58 @@ body {
       background-position: -200% 0;
     }
   }
+  .radius {
+    border: 6px solid #2B2F3C; /* Light grey */
+    border-top: 6px solid #DE4646; /* Blue */
+    border-radius: 100%;
+    width: 80px;
+    height: 80px;
+  }
+  .triangle-left {
+    width: 0;
+    height: 0;
+    border-top: 25px solid transparent;
+    border-right: 50px solid #555;
+    border-bottom: 25px solid transparent;
+  }
+  .fade-in-largecontainer {
+    opacity: 0;
+    /*transform: translateY(100px); */
+    animation: fadeIn 2s forwards; 
+}
 
+@keyframes fadeIn {
+    to {
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.fade-in-rest {
+  opacity: 0;
+  /*transform: translateY(100px); */
+  animation: fadeIn 4s forwards; 
+}
+
+@keyframes fadeIn {
+  to {
+      opacity: 1; 
+      transform: translateY(0); 
+  }
+}
+
+.fade-in-navbar {
+  opacity: 0;
+  transform: translateY(-100px); 
+  animation: fadeInNavbar 2s forwards; 
+}
+
+@keyframes fadeInNavbar {
+  to {
+      opacity: 1; 
+      transform: translateY(0); 
+  }
+}
 }
 
 @layer base {
