@@ -1,24 +1,18 @@
 'use client'
 import Image from "next/image";
-import { useState, useRef, Profiler, useMemo, useContext, useEffect } from 'react'
+import { useState, Profiler, useMemo, useContext, useEffect, lazy, Suspense  } from 'react'
 import Link from "next/link";
 import Chatbot from "./components/helpchatbot";
-import { LanguageContext } from "./components/LanguageContext";
-import { CurrencyContext } from "./components/CurrencyContext";
-import { languages } from "./components/languages";
-import { steamMarketCurrencies } from "./components/SteamMarketCurrencies";
+import { LanguageContext } from "./utils/LanguageContext";
+import { CurrencyContext } from "./utils/CurrencyContext";
+import { languages } from "./utils/languages";
+import { steamMarketCurrencies } from "./utils/steamMarketCurrencies";
+import ItemsList from "./components/ItemsList";
+import { fakeItems } from "./utils/fakeitems";
+import { heroes } from "./utils/heroes";
+import { UsernameContext, SteamidContext } from "./utils/UserContext";
 
 //this array would have ITEM name, image url, condition etc, price and add cart function
-const array = ['','','','','','','','','','','','','','','','','','','','','','','','','']
-const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Vindicta', 'Viscous', 'Warden', 'Wraith', 'Yamato',]
-const fakeItems = [{id:0, price: 1, hero: 'Shiv', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsUFJ5KBFZv668FFQznaKdID5D6d23ldHSwKOmZeyEz21XvZZ12LzE9t6nigbgqkplNjihJIaLMlhpF1ZeR5c/360fx360f', rarity: 'common'}, 
-                  {id:1, price: 10, hero: 'Seven', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsQ1xmLBcF5uj2FBdy3P7HTjlH09G_hoGMkrmkNuODwG8F7ZMl2bqSoI_22ATg_0s6a2qiIofDdA5rNVmG8la5k7i6m9bi60_Jt_x9/360fx360f', rarity: 'common'}, 
-                  {id:2, price: 200, hero: 'Shiv', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsUFJ5KBFZv668FFQznaKdID5D6d23ldHSwKOmZeyEz21XvZZ12LzE9t6nigbgqkplNjihJIaLMlhpF1ZeR5c/360fx360f', rarity: 'common'}, 
-                  {id:3, price: 1000, hero: 'McGinnis', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhhwszHeDFH6OO7kYSCgvq6YOKFkD1XvZRz2rmYporw3Vfk_RZkMGD6doeUcA86Yg6C-APtyO_v0Ij84sqHVshLpA/360fx360f', rarity: 'common'}, 
-                  {id:4, price: 10000, hero: 'Dynamo', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf2PLacDBA5ciJh5C0mvLnO4TFl2Vu5cB1g_zMu92g2g3k8kZvYmmlLYeVdw5vYl-D-VDvxOzshZDovJWbnSBmvnVx7CnD30vgSw3eKYg/360fx360f', rarity: 'common'}, 
-                  {id:5, price: 30000, hero: 'Haze', imgurl: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQh5hlcX0nvUOGsx8DdQBJjIAVHubSaIAlp1fb3ejxQ7dG0nZTFw_H3a--IlTwCuMQl3r2UoY6n3QLj80I5MDr0JIbBJg9qYFnRrFS_wvCv28FbcdtZVg/360fx360f', rarity: 'common'}]
-
-let temp: any = [] //this is where filters are stored until reload
 
 // set up feature that adds item params (hero, rarity, type) to lambda obj / storage / cookies and sends to kotlin onclick
 
@@ -48,6 +42,9 @@ export default function Home() {
   const [searchCondition, setSearchCondition] = useState(false)
 
   const [qmarkClicked, setQmarkClicked] = useState(false)
+
+  const loggedIn = useContext(UsernameContext)
+  const steamId = useContext(SteamidContext)
 
   //Profiler, check speed:
   function onRenderCallback(
@@ -111,6 +108,7 @@ export default function Home() {
 
   //add in cart items to cookies
   function addToCart(e: any) {
+    console.log(inCart)
     let temp = e.target.value 
     let parsed = parseInt(temp)
     if (inCart.includes(temp)) {
@@ -127,18 +125,28 @@ export default function Home() {
     }
   }
 
-  function filterByInCart() {
-    setFilterGlobal(true)
-    setCheckedGlobal(true)
-    setCheckedHeroes(inCart)
-  }
-
-  const userTradeObject = {
-    cartValue: Number(cartPrice),
-    loggedInSteamId: "TestId"
-  }
-
   async function tradeFunctionality() {
+
+    const currentTime = Date.now()
+
+    const heroes = inCart.map((id:any) => {
+      let object: any = fakeItems.find((t:any) => t.id == id)
+      return object.hero
+    })
+
+    const individualPrices = inCart.map((id:any) => {
+      let object: any = fakeItems.find((t:any) => t.id == id)
+      return object.price
+    })
+
+    const userTradeObject = {
+      cartValue: Number(cartPrice),
+      loggedInSteamId: steamId,
+      time: currentTime,
+      itemsInCart: heroes,
+      correspondingPrices: individualPrices
+    }
+
     setTradeError('')
     setTimeout(()=> {
       setTradeError('')
@@ -271,6 +279,9 @@ export default function Home() {
       useEffect(()=> {
         console.log(language.toString())
         console.log(matchingObjectKey)
+        setTimeout(() => {
+          console.log('context:', loggedIn)
+        }, 500)
       }, [])
 
 
@@ -287,11 +298,11 @@ export default function Home() {
       </div>
       <div className="overflow-auto p-2 tradebox h-[85%] mt-3 rounded-sm">
       <input className="w-full px-2 m-1 mb-2 mx-auto rounded-sm searchbg" placeholder={`${array[14]}`} onChange={itemSearch}></input>
-      <div className={`${signed? 'hidden' : 'flex flex-col visible mx-auto text-center gap-2 mt-20'}`}>
+      <div className={`${loggedIn? 'opacity-0 flex flex-col visible mx-auto text-center gap-2 mt-20' : 'flex flex-col visible mx-auto text-center gap-2 mt-20'}`}>
         <div className="text-4xl">❗</div>
         <div className="text-xl font-semibold">{array[1]}</div>
         <Link href="" className="redaccenttext mt-2 font-light hover:redhoveraccent">{array[2]}</Link>
-        </div>
+      </div>
       <div className={`${signed? 'grid gap-2 items-grid' : 'hidden'}`}>
         {fakeItems.map((e) => 
           <div className={`${checkedGlobal ? `${checkedHeroes.includes(e.hero) && e.price >= smallRange || e.price <= bigRange ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500' : 'hidden'}` : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-blue-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
@@ -337,22 +348,22 @@ export default function Home() {
       </div>
 
       <div className="flex-col w-full mt-4 md:mt-0 fade-in-largecontainer">
-      <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-sm">
-        <div className="">{array[13]}</div>
-        <div className="whitespace-nowrap">{matchingObjectKey}{cartPrice} 🛒</div>
-      </div>
-      <div className="overflow-auto p-2 tradebox h-[85%] mt-3 rounded-sm">
-      <input className="w-full px-2 m-1 mb-2 mx-auto rounded-sm searchbg" placeholder={`${array[14]}`} onChange={itemSearch} value={searchTerm}></input>
-      <div className="grid gap-2 items-grid">
-        {filteredItems.map((e) => 
-          <div className={`${checkedGlobal ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-yellow-500' : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-yellow-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
-            <div className="my-1 text-sm text-zinc-100">{matchingObjectKey} {e.price}</div>
-            <button className={`${inCart.includes(`${e.id}`)? 'py-1 text-sm text-white justify-end redaccent rounded-sm' : 'py-1 text-sm text-white h-fit justify-end cartbutton w-full rounded-sm transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>🛒</button>
-          </div>
-        )}
-      </div>
-      </div>
-      </div>
+        <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-sm">
+          <div className="">{array[13]}</div>
+          <div className="whitespace-nowrap">$ {cartPrice} 🛒</div>
+        </div>
+        <div className="overflow-auto p-2 tradebox h-[85%] mt-3 rounded-sm">
+        <input className="w-full px-2 m-1 mb-2 mx-auto rounded-sm searchbg" placeholder={`${array[14]}`} onChange={itemSearch} value={searchTerm}></input>
+            <div className="grid gap-2 items-grid">
+            {filteredItems.map((e) => 
+            <div className={`${checkedGlobal ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-yellow-500' : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-yellow-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
+                <div className="my-1 text-sm text-zinc-100">$USD {e.price}</div>
+                <button className={`${inCart.includes(`${e.id}`)? 'py-1 text-sm text-white justify-end redaccent rounded-sm' : 'py-1 text-sm text-white h-fit justify-end cartbutton w-full rounded-sm transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>🛒</button>
+            </div>
+            )}
+            </div>
+        </div>
+        </div>
       </div>
       </div>
       <div className={`${qmarkClicked ? `hidden` : `rounded-full text-black absolute end-0 bottom-0 m-2 w-12 h-12 redaccent overflow-hidden helpping`}`} onMouseEnter={() => setQmarkClicked(true)}></div>

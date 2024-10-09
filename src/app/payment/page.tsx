@@ -2,9 +2,9 @@
 import Link from "next/link"
 import Image from "next/image"
 
-import { steamOption } from "../components/paymentdata"
-import { paymentOptions } from "../components/paymentdata"
-import { cryptoOptions } from "../components/paymentdata"
+import { steamOption } from "../utils/paymentdata"
+import { paymentOptions } from "../utils/paymentdata"
+import { cryptoOptions } from "../utils/paymentdata"
 
 export default function Payment() {
     return (

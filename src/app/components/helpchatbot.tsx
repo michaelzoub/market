@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import { sendMsgToOpenAI } from '../service/openai';
+import { sendMsgToOpenAI } from '../services/openai';
 import Image, { StaticImageData } from 'next/image';
 import bot from '/public/bot.png'
 import user from '/public/user.png'

@@ -75,9 +75,8 @@ const PayButton: React.FC<PayButtonProps> = ({amount, currency, value }) => {
             <div className="text-white">{status}</div>
             <div>{error}</div>
             <PaymentElement id="payment-element" options={paymentElementOptions} />
-            <button disabled={!stripe} className="bg-[#e96969] border-2 border-red-300 rounded-sm w-full p-1 mt-4 shadow-inner shadow-red-500 text-white text-sm py-2 hover:shadow-red-600" onClick={completePayment} value={value}>Pay {currency}{amount}</button>
-            <div className="text-white mx-auto text-sm">Or</div>
-            <button className="text-white text-sm px-2 p-1 bg-red-600 rounded-sm m-1 mx-auto shadow-inner shadow-red-800 border-2 border-red-500">Cancel</button>
+            <button disabled={!stripe} className="shadow-red-700 redaccent rounded-sm w-full p-1 mt-4 shadow shadow-red-700 text-white py-1" onClick={completePayment} value={value}>Pay {amount}$</button>
+            <button className="mx-auto text-red-400 text-xs my-2 hover:text-red-500">Cancel</button>
             {error && <div>Test</div>}
         </form>
     )

@@ -1,9 +1,9 @@
 'use client'
-import { steamOption } from "@/app/components/paymentdata"
-import { paymentOptions } from "@/app/components/paymentdata"
-import { cryptoOptions } from "@/app/components/paymentdata"
-import { CurrencyContext } from "@/app/components/CurrencyContext"
-import { steamMarketCurrencies } from "@/app/components/SteamMarketCurrencies"
+import { steamOption } from "@/app/utils/paymentdata"
+import { paymentOptions } from "@/app/utils/paymentdata"
+import { cryptoOptions } from "@/app/utils/paymentdata"
+import { CurrencyContext } from "@/app/utils/CurrencyContext"
+import { steamMarketCurrencies } from "@/app/utils/steamMarketCurrencies"
 import { useContext, useEffect, useState } from "react"
 import Image from "next/image"
 import qr from "/public/qr.svg"
@@ -174,27 +174,29 @@ export default function paymentSlug({ params }: any) { //number for total amount
         setPaymentResponse(JSON.stringify(response.body))
     }
 
-    async function fetchPaymentIntent() {
-        if (inputAmount === 0) {
-            setNotNumberError("Required field")
-            return;
+    async function fetchPaymentIntent(e:any) {
+        if (e.type === 'click' || (e.type === 'keydown' && e.key === 'Enter')) {
+            if (inputAmount === 0) {
+                setNotNumberError("Required field")
+                return;
+            }
+            else if (!isNumber(inputAmount)) {
+                setNotNumberError("Enter a number")
+                return;
+            } 
+            const response = await fetch("http://localhost:8080/api/create-payment-intent", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            })
+            const body = await response.json()
+            setLoading(<div className="z-10 animate-spin radius mx-auto mt-32"></div>)
+            setTimeout(() => setLoadingTimer(true), body? 399 : 1000)
+            setTimeout(() => setLoading(<div></div>), body ? 399 : 1000) 
+            setClientSecretState(body.clientSecret)
         }
-        else if (!isNumber(inputAmount)) {
-            setNotNumberError("Enter a number")
-            return;
-        } 
-        const response = await fetch("http://localhost:8080/api/create-payment-intent", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(object)
-        })
-        const body = await response.json()
-        setLoading(<div className="z-10 animate-spin radius mx-auto mt-32"></div>)
-        setTimeout(() => setLoadingTimer(true), body? 399 : 1000)
-        setTimeout(() => setLoading(<div></div>), body ? 399 : 1000) 
-        setClientSecretState(body.clientSecret)
     }
 
     let payment: any;
@@ -281,20 +283,21 @@ export default function paymentSlug({ params }: any) { //number for total amount
             <div className="w-full">
             {loading}
             <div className={`${clientSecretState ? "hidden" : "w-fit p-10 px-16 mt-32 mx-auto flex flex-col hoversearchbg rounded-md shadow-inner border-2 border-gray-600"}`}>
-                <div className="p-2">Input an amount:</div>
+                <div className="py-2 font-medium text-gray-100 text-lg">Deposit with {payment.name}</div>
+                <div className="mt-1 mb-4 text-gray-300 text-sm">Enter the amount you would like to checkout with.</div>
                 <div className="flex flex-row justify-end mx-auto">
-                    <input placeholder="Payment Amount" className="p-[12px] rounded-sm text-sm bg-[#2B2F3C] border-[1.5px] border-[#e96969]" onChange={(e:any) => setInputAmount(e.target.value)} value={inputAmount} onKeyDown={fetchPaymentIntent}></input>
-                    <button className={`${buttonColor ? "mr-[-2px] m-2 bg-green-400 border-[2.5px] border-green-500 rounded-md px-[5px] py-1 text-sm text-white" : "absolute m-2 bg-white border-[2.5px] shadow-inner border-zinc-400 rounded-md px-[3px] py-1 text-sm text-zinc-400 hover:bg-green-100 hover:border-green-600 hover:text-green-500"}`} onClick={fetchPaymentIntent}>✔</button>
+                    <input placeholder="Payment Amount" className="px-[12px] pr-[170px] py-[8px] rounded-sm text-sm bg-[#2B2F3C] border-[1.5px] border-[#e96969]" onChange={(e:any) => setInputAmount(e.target.value)} value={inputAmount} onKeyDown={fetchPaymentIntent}></input>
                 </div>
-                <div className={`${notNumberError ? "absolute flex flex-row mt-12 ml-[220px]" : "hidden"}`}>
+                <button className="mt-6 mx-[-1px] shadow shadow-red-700 redaccent rounded-sm py-1" onClick={fetchPaymentIntent}>Continue</button>
+                <div className={`${notNumberError ? "absolute flex flex-row mt-[5.5rem] ml-[375px]" : "hidden"}`}>
                 <div className="absolute right-[-1.8px] text-red-500 text-sm">◀</div>
                         <span className="absolute bg-red-500 text-white text-xs rounded py-1 px-2 w-[110px]">{notNumberError}</span>
                 </div>
-                <div className="p-2 mt-4 w-52 mx-auto">Or select an amount:</div>
-                <div className="grid prices-grid px-2 w-52 mx-auto">
+                <div className="py-2 mt-4 font-medium text-gray-100">Or select an amount</div>
+                <div className="grid prices-grid">
                     {
                         suggestedDeposits.map((e:number) => 
-                            <button className="bg-red-400 rounded-sm px-4 py-2 border-2 border-red-300 shadow-inner shadow-red-500 hover:shadow-red-600" value={e} onClick={(t: any) => setInputAmount(t.target.value)}>{e}$</button>
+                            <button className="redaccent rounded-sm px-12 py-1 text-gray-200 text-sm shadow shadow-red-700 hover:shadow-red-600" value={e} onClick={(t: any) => setInputAmount(t.target.value)}>{e}$</button>
                         )
                     }
                 </div>
