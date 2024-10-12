@@ -25,7 +25,7 @@ export default function callback() {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(id),
+                    body: id,
                     credentials: 'include'
                 })  
                 const username = await playerName.json()

@@ -139,13 +139,15 @@ export default function Home() {
       return object.price
     })
 
-    const userTradeObject = {
+    const userTrade = {
       cartValue: Number(cartPrice),
       loggedInSteamId: steamId,
       time: currentTime,
       itemsInCart: heroes,
       correspondingPrices: individualPrices
     }
+
+
 
     setTradeError('')
     setTimeout(()=> {
@@ -165,7 +167,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(userTradeObject) //sent as string (id)
+        body: JSON.stringify(userTrade) //sent as string (id)
       })
       if (response.ok) {
         const res = await response.text()

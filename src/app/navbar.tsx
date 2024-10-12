@@ -21,7 +21,7 @@ export function Navbar({children}:any) {
 	const [openDropdown, setOpenDropdown] = useState<'language' | 'currency' | null>(null)
 	const [selectedLanguage, setSelectedLanguage] = useState({ code: 'EN', name: 'English', flag: usa });
   	const [loginClick, setLoginClick] = useState(false)
-	const [path, setPath] = useState("")
+	const [path, setPath] = useState(window.location.pathname)
 	const [loggedInUsername, setLoggedInUsername] = useState("")
 	const [loggedInPfp, setLoggedInPfp] = useState("")
 	const [loggedInBalance, setLoggedInBalance] = useState("")
@@ -36,6 +36,36 @@ export function Navbar({children}:any) {
   const [sidebar, setSidebar] = useState(false)
   const [showBar, setShowBar] = useState(false)
   const [heightCheck, setHeightCheck] = useState(false)
+
+  useEffect(() => {
+	async function updateBalance() {
+		const response = await fetch("http://localhost:8080/api/updatecookies", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+		const body = await response.json()
+		console.log(body)
+		setLoggedInBalance(body.toString())
+	}
+	updateBalance()
+  },[])
+
+  useEffect(() => {
+	function handleChange() {
+		setPath(window.location.pathname)
+		setOpenProfileSettings(false)
+	}
+
+	handleChange()
+
+	window.addEventListener('popstate', handleChange);
+
+	return () => {
+		window.removeEventListener('popstate', handleChange)
+	}
+  },[path])
 
   useEffect(() => {
     setLoggedInUsername("null");
@@ -113,18 +143,20 @@ export function Navbar({children}:any) {
 	let array: Array<String> = [];
 
 	useEffect(() => {
-		if (selectedLanguage.name === "English") {
-			console.log('english hit')
-			array = languagesnavbar.English
-			console.log(array)
-		  } if (selectedLanguage.name == "Portuguese") {
-			console.log('portuguese hit')
-			array = languagesnavbar.Portuguese
-			console.log(array)
-		  } if (selectedLanguage.name == "Chinese") {
-			array = languagesnavbar.Chinese
-		  }
+
 	}, [])
+
+	if (selectedLanguage.name === "English") {
+		console.log('english hit')
+		array = languagesnavbar.English
+		console.log(array)
+	  } if (selectedLanguage.name == "Portuguese") {
+		console.log('portuguese hit')
+		array = languagesnavbar.Portuguese
+		console.log(array)
+	  } if (selectedLanguage.name == "Chinese") {
+		array = languagesnavbar.Chinese
+	  }
 
 
 	const [deposit, setDeposit] = useState(false)
@@ -144,14 +176,14 @@ export function Navbar({children}:any) {
 				<Link href="/" className="hover:cursor-pointer mr-2">
 					<Image src={dlockbanner} alt="Dlock Banner" width={140} height={60} />
 				</Link>
-				<Link href="/market" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[0]}</Link>
-				<Link href="/trade" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[1]}</Link>
-				<Link href="/components/statsimage" className="nav-tab font-bold pt-1 text-gray-500 text-sm">{array[2]}</Link>
+				<Link href="/market" className="z-50 nav-tab font-semibold pt-1 text-gray-500 text-sm hover:text-gray-600">{array[0]}</Link>
+				<Link href="/trade" className="nav-tab  pt-1 font-semibold text-gray-500 text-sm hover:text-gray-600">{array[1]}</Link>
+				<Link href="/components/statsimage" className="nav-tab font-semibold pt-1 text-gray-500 text-sm hover:text-gray-600">{array[2]}</Link>
 			</div>
 			<div className="flex items-center mr-2">
 				<Link href="/payment" className="z-10 login-button redaccent rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-sm" onClick={() => setDeposit(true)}>Deposit</Link>
 				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-zinc-300 text-sm" onClick={() => console.log('add withdraw')}>Withdraw</Link>
-				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[8px] flex items-center w-12 justify-center text-sm mx-2 text-zinc-300 text-sm" onClick={() => setDeposit(true)}>${loggedInBalance?.includes("null") ? '0' : loggedInBalance}</Link>
+				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[8px] px-[5px] flex items-center w-fit justify-center text-sm mx-2 text-zinc-300 text-sm truncate ">${loggedInBalance?.includes("null") ? '0' : loggedInBalance}</Link>
 				<Link href={authorizationUrl} className={`${!loggedInUsername.includes("null") ? "hidden" : "relative login-button flex items-center mx-3 w-16 py-1 text-sm font-bold rounded-sm"}`}>
 					<Image src={steam} alt='steam' width={20} height={20} className={`mr-1 invert`} />
 					Login
@@ -170,7 +202,7 @@ export function Navbar({children}:any) {
 					</div>
 					<div className={`absolute top-full w-36 mt-[-7px] ml-[-29.8px] transition-max-height duration-150 overflow-hidden ${openProfileSettings ? "" : "max-h-0"}`}>
 						<div className={`${openProfileSettings ? "flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden"}`}>
-								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton">Testing</button>
+								<Link href={`${loggedInSteamId}/transaction`} className="text-left rounded-md w-full py-1 px-2 hover:cartbutton">Transactions</Link>
 								<button className="text-left rounded-md w-full py-1 px-2 text-red-400 hover:cartbutton" onClick={clearCookies}>Logout</button>
 						</div>
 					</div>
