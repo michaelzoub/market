@@ -1,4 +1,4 @@
-export default function UserInfo() {
+export default function Page() {
     return (
         <main>
             

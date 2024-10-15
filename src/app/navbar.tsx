@@ -9,7 +9,7 @@ import dlockbanner from '/public/bannerdlock.png'
 import { useState, useEffect } from "react";
 import { LanguageContext } from "./utils/LanguageContext";
 import { CurrencyContext } from "./utils/CurrencyContext";
-import { UserprofilepicContext, UsernameContext, SteamidContext } from '@/app/utils/UserContext'
+import { UserprofilepicContext, UsernameContext, SteamidContext, TotalTradesContext, BalanceContext } from '@/app/utils/UserContext'
 import { languagesnavbar } from "./utils/languages";
 import Deposit from "./components/depositmodal";
 import { authorizationUrl } from "./services/openid";
@@ -21,11 +21,13 @@ export function Navbar({children}:any) {
 	const [openDropdown, setOpenDropdown] = useState<'language' | 'currency' | null>(null)
 	const [selectedLanguage, setSelectedLanguage] = useState({ code: 'EN', name: 'English', flag: usa });
   	const [loginClick, setLoginClick] = useState(false)
-	const [path, setPath] = useState(window.location.pathname)
+	const [path, setPath] = useState(location.pathname)
 	const [loggedInUsername, setLoggedInUsername] = useState("")
 	const [loggedInPfp, setLoggedInPfp] = useState("")
 	const [loggedInBalance, setLoggedInBalance] = useState("")
+	const [balanceTest, setBalanceTest] = useState("")
 	const [loggedInSteamId, setLoggedInSteamId] = useState("")
+	const [loggedInTransactions, setLoggedInTransactions] = useState("")
 	const [openProfileSettings, setOpenProfileSettings] = useState(false)
 	const [profileOpen, setProfileOpen] = useState(false)
 
@@ -39,41 +41,30 @@ export function Navbar({children}:any) {
 
   useEffect(() => {
 	async function updateBalance() {
-		const response = await fetch("http://localhost:8080/api/updatecookies", {
+		const response = await fetch("http://localhost:8080/api/updatebalance", {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json"
-			}
+			},
+			credentials: 'include'
 		})
 		const body = await response.json()
 		console.log(body)
-		setLoggedInBalance(body.toString())
+		if (body) {
+			setLoggedInBalance(body.toString())
+		}
 	}
 	updateBalance()
-  },[])
+  },[balanceTest])
 
   useEffect(() => {
-	function handleChange() {
-		setPath(window.location.pathname)
-		setOpenProfileSettings(false)
-	}
-
-	handleChange()
-
-	window.addEventListener('popstate', handleChange);
-
-	return () => {
-		window.removeEventListener('popstate', handleChange)
-	}
-  },[path])
-
-  useEffect(() => {
-    setLoggedInUsername("null");
+    setLoggedInUsername("");
     setLoggedInPfp("null");
     setLoggedInBalance("0.0");
 	setLoggedInSteamId("null")
+	setLoggedInTransactions("")
 
-    setPath(window.location.pathname);
+    setPath(location.pathname);
 
     async function fetchCookies() {
         try {
@@ -96,6 +87,8 @@ export function Navbar({children}:any) {
                 setLoggedInPfp(body[1]);
                 setLoggedInBalance(body[2]);
 				setLoggedInSteamId(body[3])
+				console.log('BODY HERE: ',body)
+				setLoggedInTransactions(body[4])
             }
         } catch (error) {
             console.error('Error fetching cookies:', error);
@@ -105,22 +98,25 @@ export function Navbar({children}:any) {
     // Check if path includes '/auth/callback'
     if (window.location.pathname.includes('/auth/callback') || window.location.pathname.includes('')) {
         console.log('Window.location works');
-        fetchCookies();
+        fetchCookies()
+		//window.location.reload()
     }
 
-}, [location.pathname, loggedInUsername]);
+}, []);
 
 	async function clearCookies() {
 		const response = await fetch("http://localhost:8080/api/clearcookies", {
 			method: 'POST',
 			credentials: 'include'
 		})
-		const body = await response.json()
+		const body = await response.text()
 		console.log('cleared cookies:', body)
-		setLoggedInBalance("0.0")
+		setLoggedInBalance("null")
 		setLoggedInPfp("null")
-		setLoggedInUsername("null")
-		useRouter().push('/')
+		setLoggedInUsername("")
+		setLoggedInTransactions("")
+		setLoggedInSteamId("")
+		window.location.reload()
 	}
 
     function sideBar() {
@@ -139,12 +135,11 @@ export function Navbar({children}:any) {
     }
     }
 
+	function onTradeBalanceContext(state: any) {
+		setBalanceTest(state)
+	}
 
 	let array: Array<String> = [];
-
-	useEffect(() => {
-
-	}, [])
 
 	if (selectedLanguage.name === "English") {
 		console.log('english hit')
@@ -169,6 +164,8 @@ export function Navbar({children}:any) {
 		<UsernameContext.Provider value={loggedInUsername}>
 		<LanguageContext.Provider value={selectedLanguage.name}>
 		<SteamidContext.Provider value={loggedInSteamId}>
+		<BalanceContext.Provider value={{loggedInBalance, onTradeBalanceContext}}>
+		<TotalTradesContext.Provider value={loggedInTransactions}>
 		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full overflow-x-hidden ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 md:overflow-visible`}`}>
 			<div className="fade-in-navbar z-10 invisible md:visible md:w-full flex justify-between text-sm">
 
@@ -184,14 +181,14 @@ export function Navbar({children}:any) {
 				<Link href="/payment" className="z-10 login-button redaccent rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-sm" onClick={() => setDeposit(true)}>Deposit</Link>
 				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-zinc-300 text-sm" onClick={() => console.log('add withdraw')}>Withdraw</Link>
 				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[8px] px-[5px] flex items-center w-fit justify-center text-sm mx-2 text-zinc-300 text-sm truncate ">${loggedInBalance?.includes("null") ? '0' : loggedInBalance}</Link>
-				<Link href={authorizationUrl} className={`${!loggedInUsername.includes("null") ? "hidden" : "relative login-button flex items-center mx-3 w-16 py-1 text-sm font-bold rounded-sm"}`}>
+				<Link href={authorizationUrl} className={`${loggedInUsername ? "hidden" : "relative login-button flex items-center mx-3 w-16 py-1 text-sm font-bold rounded-sm"}`}>
 					<Image src={steam} alt='steam' width={20} height={20} className={`mr-1 invert`} />
 					Login
 				</Link>
 				<button className={`${!loggedInUsername.includes("null") ? "flex flex-col login-button searchbg flex items-center mx-3 mr-6 w-18 py-1 text-sm font-bold rounded-sm" : "hidden"}`}>
 					<div className="flex flex-row">
 						<Image src={loggedInPfp.includes("null") ? '' : loggedInPfp} alt="User's profile picture" width={30} height={30} className={`${loggedInPfp.includes("null")? "hidden" : "rounded-sm my-auto mx-[3px]"}`}></Image>
-						<button className={`${!loggedInUsername.includes("null") ? 'mx-2 max-w-fit h-[100A%]' : 'hidden'}`} onClick={() => setOpenProfileSettings((prev:any) => !prev)}>
+						<button className={`${loggedInUsername ? 'mx-2 max-w-fit h-[100A%]' : 'hidden'}`} onClick={() => setOpenProfileSettings((prev:any) => !prev)}>
 							<div className={`${openProfileSettings ? "transition-transform duration-150 rotate-180 h-2" : "w-fit h-2 transition-transform duration-150"}`} onClick={() => setProfileOpen((e) => !e)}>
 								<svg className="visible" width="18" height="9" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 12">
 									<path d="M0 0 L9 9 L18 0" fill="none" stroke="gray" stroke-width="3"></path>
@@ -202,7 +199,7 @@ export function Navbar({children}:any) {
 					</div>
 					<div className={`absolute top-full w-36 mt-[-7px] ml-[-29.8px] transition-max-height duration-150 overflow-hidden ${openProfileSettings ? "" : "max-h-0"}`}>
 						<div className={`${openProfileSettings ? "flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden"}`}>
-								<Link href={`${loggedInSteamId}/transaction`} className="text-left rounded-md w-full py-1 px-2 hover:cartbutton">Transactions</Link>
+								<Link href={`http://localhost:3000/${loggedInSteamId}/transaction`} className="text-left rounded-md w-full py-1 px-2 hover:cartbutton">Transactions</Link>
 								<button className="text-left rounded-md w-full py-1 px-2 text-red-400 hover:cartbutton" onClick={clearCookies}>Logout</button>
 						</div>
 					</div>
@@ -229,6 +226,8 @@ export function Navbar({children}:any) {
       </div>
 		</nav>
 		{children}
+		</TotalTradesContext.Provider>
+		</BalanceContext.Provider>
 		</SteamidContext.Provider>
 		</LanguageContext.Provider>
 		</UsernameContext.Provider>

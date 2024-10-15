@@ -10,7 +10,7 @@ import { steamMarketCurrencies } from "./utils/steamMarketCurrencies";
 import ItemsList from "./components/ItemsList";
 import { fakeItems } from "./utils/fakeitems";
 import { heroes } from "./utils/heroes";
-import { UsernameContext, SteamidContext } from "./utils/UserContext";
+import { UsernameContext, SteamidContext, BalanceContext } from "./utils/UserContext";
 
 //this array would have ITEM name, image url, condition etc, price and add cart function
 
@@ -45,6 +45,7 @@ export default function Home() {
 
   const loggedIn = useContext(UsernameContext)
   const steamId = useContext(SteamidContext)
+  const {onTradeBalanceContext}:any = useContext(BalanceContext)
 
   //Profiler, check speed:
   function onRenderCallback(
@@ -152,7 +153,7 @@ export default function Home() {
     setTradeError('')
     setTimeout(()=> {
       setTradeError('')
-    }, 3000)
+    }, 5000)
     if (signed) {
       setTradeError('TRADE FAILED; SIGN IN.')
     } else {
@@ -170,11 +171,12 @@ export default function Home() {
         body: JSON.stringify(userTrade) //sent as string (id)
       })
       if (response.ok) {
-        const res = await response.text()
-        if (res === 'false') {
+        const res = await response.json()
+        if (!res) {
           setTradeError("Error, missing funds.")
         } else {
           setTradeError("Success, waiting for bot.")
+          onTradeBalanceContext()
         }
       } else {
         setTradeError("Error, internal server.")

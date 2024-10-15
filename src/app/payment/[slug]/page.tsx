@@ -158,22 +158,6 @@ export default function paymentSlug({ params }: any) { //number for total amount
         }
     }
 
-    async function confirmPayment(e:any) {
-        e.preventDefault()
-        setButtonColor(true)
-        //send to backend
-        const response = await fetch('http://localhost:8080/api/confirm-payment-intent', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify(object)
-        })
-
-        console.log(response.body)
-        setPaymentResponse(JSON.stringify(response.body))
-    }
-
     async function fetchPaymentIntent(e:any) {
         if (e.type === 'click' || (e.type === 'keydown' && e.key === 'Enter')) {
             if (inputAmount === 0) {
