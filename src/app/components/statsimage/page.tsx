@@ -13,7 +13,7 @@ export default function ImageCaptureStatsPage() {
     const [imgSrc, setImgSrc] = useState<String>()
     const [loading, setLoading] = useState(true);
 
-    const balance = useContext(BalanceContext)
+    const balance:any = useContext(BalanceContext)
     const totalTrades = useContext(TotalTradesContext)
     const username = useContext(UsernameContext)
     const split = username.replace(/\+/g, " ")

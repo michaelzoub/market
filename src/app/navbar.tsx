@@ -19,17 +19,19 @@ export function Navbar({children}:any) {
 	//update language and currency method, useEffect -> set as cookie if exists, else 
 
 	const [openDropdown, setOpenDropdown] = useState<'language' | 'currency' | null>(null)
-	const [selectedLanguage, setSelectedLanguage] = useState({ code: 'EN', name: 'English', flag: usa });
+	const [selectedLanguage, setSelectedLanguage]:any = useState({ code: 'EN', name: 'English', flag: usa });
   	const [loginClick, setLoginClick] = useState(false)
 	const [path, setPath] = useState(location.pathname)
 	const [loggedInUsername, setLoggedInUsername] = useState("")
 	const [loggedInPfp, setLoggedInPfp] = useState("")
-	const [loggedInBalance, setLoggedInBalance] = useState("")
+	const [loggedInBalance, setLoggedInBalance] = useState("0.0")
 	const [balanceTest, setBalanceTest] = useState("")
 	const [loggedInSteamId, setLoggedInSteamId] = useState("")
 	const [loggedInTransactions, setLoggedInTransactions] = useState("")
 	const [openProfileSettings, setOpenProfileSettings] = useState(false)
 	const [profileOpen, setProfileOpen] = useState(false)
+	const [languageslength, setLanguageslength] = useState<any>()
+	const [languagesSettingClicked, setLanguagesSettingClicked] = useState(false)
 
 	const toggleDropdown = (dropdown: 'language' | 'currency') => {
 		setOpenDropdown(openDropdown === dropdown ? null : dropdown)
@@ -38,6 +40,10 @@ export function Navbar({children}:any) {
   const [sidebar, setSidebar] = useState(false)
   const [showBar, setShowBar] = useState(false)
   const [heightCheck, setHeightCheck] = useState(false)
+
+  const languagesArray = [{ code: 'EN', name: 'English', flag: usa }, 
+	{ code: 'PT', name: 'Portuguese', flag: brazil }, 
+	{ code: 'CH', name: 'Chinese', flag: china }]
 
   useEffect(() => {
 	async function updateBalance() {
@@ -63,6 +69,8 @@ export function Navbar({children}:any) {
     setLoggedInBalance("0.0");
 	setLoggedInSteamId("null")
 	setLoggedInTransactions("")
+
+	setLanguageslength(Object.keys(languagesnavbar).length)
 
     setPath(location.pathname);
 
@@ -197,9 +205,15 @@ export function Navbar({children}:any) {
 							<div className="hidden">{loggedInBalance}</div>
 						</button>
 					</div>
+					<div className={`${openProfileSettings ? languagesSettingClicked ? "absolute mr-[285px] mt-[42px] flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden" : "hidden"}`} onMouseLeave={() => setLanguagesSettingClicked(false)}>
+										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton">{languagesArray[0].name}</button>
+										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton">{languagesArray[1].name}</button>
+										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton">{languagesArray[2].name}</button>
+									</div>
 					<div className={`absolute top-full w-36 mt-[-7px] ml-[-29.8px] transition-max-height duration-150 overflow-hidden ${openProfileSettings ? "" : "max-h-0"}`}>
 						<div className={`${openProfileSettings ? "flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden"}`}>
 								<Link href={`http://localhost:3000/${loggedInSteamId}/transaction`} className="text-left rounded-md w-full py-1 px-2 hover:cartbutton">Transactions</Link>
+								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton" onMouseEnter={() => setLanguagesSettingClicked(true)} onMouseLeave={() => setLanguagesSettingClicked(false)}>Languages ←</button>
 								<button className="text-left rounded-md w-full py-1 px-2 text-red-400 hover:cartbutton" onClick={clearCookies}>Logout</button>
 						</div>
 					</div>

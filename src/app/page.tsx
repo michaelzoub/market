@@ -11,6 +11,7 @@ import ItemsList from "./components/ItemsList";
 import { fakeItems } from "./utils/fakeitems";
 import { heroes } from "./utils/heroes";
 import { UsernameContext, SteamidContext, BalanceContext } from "./utils/UserContext";
+import { addAndSendTradeBot } from "./services/steamtrade";
 
 //this array would have ITEM name, image url, condition etc, price and add cart function
 
@@ -176,6 +177,14 @@ export default function Home() {
           setTradeError("Error, missing funds.")
         } else {
           setTradeError("Success, waiting for bot.")
+          await fetch("/tempapi/tradeoffer/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(userTrade)
+          })
+          //addAndSendTradeBot(userTrade.itemsInCart, userTrade.loggedInSteamId) //sends trade offer using bot
           onTradeBalanceContext()
         }
       } else {
@@ -360,7 +369,7 @@ export default function Home() {
         <input className="w-full px-2 m-1 mb-2 mx-auto rounded-sm searchbg" placeholder={`${array[14]}`} onChange={itemSearch} value={searchTerm}></input>
             <div className="grid gap-2 items-grid">
             {filteredItems.map((e) => 
-            <div className={`${checkedGlobal ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-yellow-500' : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-yellow-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
+            <div className={`${checkedGlobal ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-red-400' : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-red-400'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
                 <div className="my-1 text-sm text-zinc-100">$USD {e.price}</div>
                 <button className={`${inCart.includes(`${e.id}`)? 'py-1 text-sm text-white justify-end redaccent rounded-sm' : 'py-1 text-sm text-white h-fit justify-end cartbutton w-full rounded-sm transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>🛒</button>
             </div>
