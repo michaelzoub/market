@@ -1,8 +1,8 @@
-import { fakeItems } from "../utils/fakeitems"
+import { fakeItems } from "../data/fakeitems"
 import { useState, useMemo, useContext } from "react"
 import Image from "next/image"
 import { LanguageContext } from "../utils/LanguageContext"
-import { languages } from "../utils/languages"
+import { languages } from "../data/languages"
 
 export default function ItemsList() {
     const [filterGlobal, setFilterGlobal] = useState(false) //checks wether user is filtering

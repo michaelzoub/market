@@ -1,9 +1,9 @@
 'use client'
-import { steamOption } from "@/app/utils/paymentdata"
-import { paymentOptions } from "@/app/utils/paymentdata"
-import { cryptoOptions } from "@/app/utils/paymentdata"
+import { steamOption } from "@/app/data/paymentdata"
+import { paymentOptions } from "@/app/data/paymentdata"
+import { cryptoOptions } from "@/app/data/paymentdata"
 import { CurrencyContext } from "@/app/utils/CurrencyContext"
-import { steamMarketCurrencies } from "@/app/utils/steamMarketCurrencies"
+import { steamMarketCurrencies } from "@/app/data/steamMarketCurrencies"
 import { useContext, useEffect, useState } from "react"
 import Image from "next/image"
 import qr from "/public/qr.svg"

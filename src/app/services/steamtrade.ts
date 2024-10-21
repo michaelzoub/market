@@ -26,9 +26,18 @@ let logOnOptions = {
 	"twoFactorCode": SteamTotp.getAuthCode(steamGuard)
 }
 
+export function getSteamIdAndToken(steamId: string, tradeOfferLink: string) {
+    const token = tradeOfferLink.split("=")[2]
+    //convert original steamid to steamid3
+    const partnerSteamId3 = tradeOfferLink.split("=")[1].split("&")[0]
+    const tokenAndSteamObject = {
+        token: token,
+        steamId3: partnerSteamId3
+    }
+    return tokenAndSteamObject
+}
 
-
-     function addMyItemByName(itemName: string, manager: any) {
+function addMyItemByName(itemName: string, manager: any) {
             //we'd later switch 730 and 2 to Deadlock's numbers
             manager.getUserInventoryContents(730, 2, true, () => (err:any, items:any) => {
                 if (err) {
@@ -58,7 +67,11 @@ async function fetchTargetItems(steamId: string) {
     return json
 }
 
-export async function addAndSendTradeBot(itemStringList: any, steamId: string) {
+export function getInventory() {
+
+}
+
+export async function addAndSendTradeBot(itemStringList: any, steamId: string, token: string, transactionId: string) {
     //first log in
     client.logOn(logOnOptions)
     client.on('loggedOn', function() {
@@ -83,9 +96,9 @@ export async function addAndSendTradeBot(itemStringList: any, steamId: string) {
         }
         if (itemStringList.every((e:string) => fetchedItems.includes(e))) {
             //then send trade
-            let createdOffer = manager.createOffer(`https://steamcommunity.com/tradeoffer/new/?partner=${testPartner}&token=${testToken}`)
+            let createdOffer = manager.createOffer(`https://steamcommunity.com/tradeoffer/new/?partner=${steamId}&token=${token}`)
             createdOffer.addMyItems(getItems)
-            createdOffer.setMessage("ADD_UUID")
+            createdOffer.setMessage(`Transaction ID: ${transactionId}`)
             createdOffer.send(() => (error: any, status: any) => {
                 if (error) {
                     console.log(error)

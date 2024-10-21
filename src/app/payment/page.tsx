@@ -4,9 +4,9 @@ import Image from "next/image"
 import { useContext, useState, useEffect } from "react"
 import { UsernameContext } from "../utils/UserContext"
 
-import { steamOption } from "../utils/paymentdata"
-import { paymentOptions } from "../utils/paymentdata"
-import { cryptoOptions } from "../utils/paymentdata"
+import { steamOption } from "../data/paymentdata"
+import { paymentOptions } from "../data/paymentdata"
+import { cryptoOptions } from "../data/paymentdata"
 
 export default function Payment() {
     const [userIsLogged, setUserIsLogged] = useState(false)

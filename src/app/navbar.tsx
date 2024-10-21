@@ -9,8 +9,8 @@ import dlockbanner from '/public/bannerdlock.png'
 import { useState, useEffect } from "react";
 import { LanguageContext } from "./utils/LanguageContext";
 import { CurrencyContext } from "./utils/CurrencyContext";
-import { UserprofilepicContext, UsernameContext, SteamidContext, TotalTradesContext, BalanceContext } from '@/app/utils/UserContext'
-import { languagesnavbar } from "./utils/languages";
+import { UserprofilepicContext, UsernameContext, SteamidContext, TotalTradesContext, BalanceContext, TradeLinkContext } from '@/app/utils/UserContext'
+import { languagesnavbar } from "./data/languages";
 import Deposit from "./components/depositmodal";
 import { authorizationUrl } from "./services/openid";
 import { useRouter } from 'next/router';
@@ -28,10 +28,14 @@ export function Navbar({children}:any) {
 	const [balanceTest, setBalanceTest] = useState("")
 	const [loggedInSteamId, setLoggedInSteamId] = useState("")
 	const [loggedInTransactions, setLoggedInTransactions] = useState("")
+	const [loggedInTradeLink, setLoggedInTradeLink] = useState("")
 	const [openProfileSettings, setOpenProfileSettings] = useState(false)
 	const [profileOpen, setProfileOpen] = useState(false)
 	const [languageslength, setLanguageslength] = useState<any>()
 	const [languagesSettingClicked, setLanguagesSettingClicked] = useState(false)
+	const [tradeLinkWindow, setTradeLinkWindow] = useState(false)
+	const [tradeLinkValue, setTradeLinkValue] = useState("")
+	const[tradeLinkButtonState, setTradeLinkButtonState] = useState("Set")
 
 	const toggleDropdown = (dropdown: 'language' | 'currency') => {
 		setOpenDropdown(openDropdown === dropdown ? null : dropdown)
@@ -97,6 +101,7 @@ export function Navbar({children}:any) {
 				setLoggedInSteamId(body[3])
 				console.log('BODY HERE: ',body)
 				setLoggedInTransactions(body[4])
+				setLoggedInTradeLink(body[5])
             }
         } catch (error) {
             console.error('Error fetching cookies:', error);
@@ -114,17 +119,55 @@ export function Navbar({children}:any) {
 
 	async function clearCookies() {
 		const response = await fetch("http://localhost:8080/api/clearcookies", {
-			method: 'POST',
-			credentials: 'include'
+			method: "POST",
+			credentials: "include"
 		})
 		const body = await response.text()
-		console.log('cleared cookies:', body)
+		console.log("cleared cookies:", body)
 		setLoggedInBalance("null")
 		setLoggedInPfp("null")
 		setLoggedInUsername("")
 		setLoggedInTransactions("")
 		setLoggedInSteamId("")
 		window.location.reload()
+	}
+
+	function setTradeLinkCookie(e: any) {
+		async function sendToServer(tradeLink: string, steamId: string) {
+			const response = await fetch("http://localhost:8080/api/add-trade-link", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({tradeLink: tradeLink, steamId: steamId}),
+				credentials: "include"
+			})
+			const tradeLinkCookies = await response.json()
+			console.log("Trade link cookies set: ", tradeLinkCookies)
+			return tradeLinkCookies
+		}
+
+		if (e.key == "Enter" || !e.key) {
+			setTradeLinkButtonState("Setting...")
+			//turn trade link into array and check if includes wanted fields https://steamcommunity.com/tradeoffer/new/?partner=440715549&token=mB8IC961
+			const tradeLinkArray: any = tradeLinkValue.split("?")[1]
+			console.log(tradeLinkArray)
+			const arrays = tradeLinkArray.split("&")
+			const partner = arrays[0].split("=")
+			const token = arrays[1].split("=")
+			if (!partner.includes("partner") || !token.includes("token")) {
+				setTradeLinkButtonState("Error")
+				setTimeout(() => {
+					setTradeLinkWindow(false)
+				}, 600)
+			} else {
+				setLoggedInTradeLink(tradeLinkValue)
+				const serverResponse = sendToServer(tradeLinkValue, loggedInSteamId)
+				setTimeout(() => {
+					setTradeLinkWindow(false)
+				}, 600)
+			}
+		}
 	}
 
     function sideBar() {
@@ -173,11 +216,22 @@ export function Navbar({children}:any) {
 		<LanguageContext.Provider value={selectedLanguage.name}>
 		<SteamidContext.Provider value={loggedInSteamId}>
 		<BalanceContext.Provider value={{loggedInBalance, onTradeBalanceContext}}>
+		<TradeLinkContext.Provider value={loggedInTradeLink}>
 		<TotalTradesContext.Provider value={loggedInTransactions}>
-		<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full overflow-x-hidden ${heightCheck ? 'h-screen' : 'h-16'} md:h-16 md:overflow-visible`}`}>
-			<div className="fade-in-navbar z-10 invisible md:visible md:w-full flex justify-between text-sm">
-
-      <div className="flex items-center space-x-6 ml-4">
+	<nav className={`${sidebar? 'absolute flex flex-row overflow-hidden text-white w-full h-screen md:h-16' : `absolute flex flex-row text-white w-full overflow-x-hidden ${heightCheck ? 'h-screen z-100' : 'h-16'} md:h-16 md:overflow-visible`}`}>
+		<div className={`${tradeLinkWindow ? "absolute z-50 w-full h-screen backdrop-blur" : "hidden"}`}>
+			<div className={`${tradeLinkWindow ? "z-25 w-fit flex flex-col backdrop-blur mx-auto mt-36 p-10 py-16 rounded-md searchbg gap-2 border-2 border-zinc-600 shadow-inner text-center" : "hidden"}`}>
+				<text>Set or change your trade link:</text>
+				<input placeholder="Paste your trade link" className="px-[12px] py-[8px] rounded-sm text-sm bg-[#2B2F3C] border-[1.5px] border-[#e96969]" onChange={(e:any) => setTradeLinkValue(e.target.value)} value={tradeLinkValue} onKeyDown={setTradeLinkCookie}></input>
+				<text className="text-sm">You can find your trade link here:</text>
+				<div className="flex flex-row gap-2 w-44 justify-between mx-auto">
+					<Link href={`https://steamcommunity.com/id/me/tradeoffers/privacy#trade_offer_access_url`} target="_blank" className="mx-[-1px] shadow shadow-red-700 redaccent rounded-sm py-[1px] w-20">Link ↗</Link>
+					<button className="mx-[-1px] shadow shadow-red-700 redaccent rounded-sm py-[1px] w-20" onClick={setTradeLinkCookie} value={tradeLinkValue}>{tradeLinkButtonState}</button>
+				</div>
+			</div>
+		</div>
+		<div className="z-50 fade-in-navbar z-10 invisible md:visible md:w-full flex justify-between text-sm">
+      		<div className="flex items-center space-x-6 ml-4">
 				<Link href="/" className="hover:cursor-pointer mr-2">
 					<Image src={dlockbanner} alt="Dlock Banner" width={140} height={60} />
 				</Link>
@@ -213,6 +267,7 @@ export function Navbar({children}:any) {
 					<div className={`absolute top-full w-36 mt-[-7px] ml-[-29.8px] transition-max-height duration-150 overflow-hidden ${openProfileSettings ? "" : "max-h-0"}`}>
 						<div className={`${openProfileSettings ? "flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden"}`}>
 								<Link href={`http://localhost:3000/${loggedInSteamId}/transaction`} className="text-left rounded-md w-full py-1 px-2 hover:cartbutton">Transactions</Link>
+								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton" onClick={() => setTradeLinkWindow(curr => !curr)}>Trade link</button>
 								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton" onMouseEnter={() => setLanguagesSettingClicked(true)} onMouseLeave={() => setLanguagesSettingClicked(false)}>Languages ←</button>
 								<button className="text-left rounded-md w-full py-1 px-2 text-red-400 hover:cartbutton" onClick={clearCookies}>Logout</button>
 						</div>
@@ -221,26 +276,27 @@ export function Navbar({children}:any) {
 			</div>
       </div>
 
-      <div className={`${sidebar? 'absolute flex w-full flex-row justify-end h-screen md:hidden' : 'transition delay-150 flex w-full h-0 flex-row justify-end md:hidden'}`}>
-          <div className="flex flex-col w-full">
-            <button className={`${sidebar? 'z-20 absolute end-0 text-end m-4 text-red-400' : 'absolute end-0 text-end m-4'}`} onClick={sideBar}>═</button>
-            <div className={`${sidebar? 'z-10 flex flex-row h-screen justify-end w-full transition ease-in-out delay-150 backdrop-blur' : 'w-full navbarblur'}`}>
-            <div className={`${showBar? 'z-10 flex flex-col gap-4 animate-show w-[100%] tradebox h-screen pt-14 text-left px-4' : 'hiddenLogin flex flex-col gap-4 w-[100%] h-screen tradebox pt-14 px-4'}`}>
-              <div className="mx-auto flex flex-row text-xl hover:cursor-pointer font-bold">d<span className="text-red-500">lock</span>.shop</div>
-              <Link href="/service/api/auth/login" className="login-button flex items-center px-6 py-2 text-sm font-bold mx-auto hover:redhoveraccenttext">
-					      <Image src={steam} alt='steam' width={20} height={20} className="mr-2 invert" />
-					      Login
-			  </Link>
-              <div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Market</div>
-              <div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Trade</div>
-              <div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">FAQ</div>
-            </div>
-            </div>
-          </div>
-      </div>
-		</nav>
+		<div className={`${sidebar? 'absolute flex w-full flex-row justify-end h-screen md:hidden' : 'transition delay-150 flex w-full h-0 flex-row justify-end md:hidden'}`}>
+			<div className="flex flex-col w-full">
+				<button className={`${sidebar? 'z-20 absolute end-0 text-end m-4 text-red-400' : 'absolute end-0 text-end m-4'}`} onClick={sideBar}>═</button>
+				<div className={`${sidebar? 'z-10 flex flex-row h-screen justify-end w-full transition ease-in-out delay-150 backdrop-blur' : 'w-full navbarblur'}`}>
+				<div className={`${showBar? 'z-10 flex flex-col gap-4 animate-show w-[100%] tradebox h-screen pt-14 text-left px-4' : 'hiddenLogin flex flex-col gap-4 w-[100%] h-screen tradebox pt-14 px-4'}`}>
+				<div className="mx-auto flex flex-row text-xl hover:cursor-pointer font-bold">d<span className="text-red-500">lock</span>.shop</div>
+				<Link href="/service/api/auth/login" className="login-button flex items-center px-6 py-2 text-sm font-bold mx-auto hover:redhoveraccenttext">
+							<Image src={steam} alt='steam' width={20} height={20} className="mr-2 invert" />
+							Login
+				</Link>
+				<div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Market</div>
+				<div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Trade</div>
+				<div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">FAQ</div>
+				</div>
+				</div>
+			</div>
+		</div>
+	</nav>
 		{children}
 		</TotalTradesContext.Provider>
+		</TradeLinkContext.Provider>
 		</BalanceContext.Provider>
 		</SteamidContext.Provider>
 		</LanguageContext.Provider>

@@ -9,3 +9,5 @@ export const SteamidContext = createContext("null")
 export const TotalTradesContext = createContext("")
 
 export const BalanceContext: any = createContext("null")
+
+export const TradeLinkContext = createContext("")

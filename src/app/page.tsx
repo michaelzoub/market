@@ -5,12 +5,12 @@ import Link from "next/link";
 import Chatbot from "./components/helpchatbot";
 import { LanguageContext } from "./utils/LanguageContext";
 import { CurrencyContext } from "./utils/CurrencyContext";
-import { languages } from "./utils/languages";
-import { steamMarketCurrencies } from "./utils/steamMarketCurrencies";
+import { languages } from "./data/languages";
+import { steamMarketCurrencies } from "./data/steamMarketCurrencies";
 import ItemsList from "./components/ItemsList";
-import { fakeItems } from "./utils/fakeitems";
-import { heroes } from "./utils/heroes";
-import { UsernameContext, SteamidContext, BalanceContext } from "./utils/UserContext";
+import { fakeItems } from "./data/fakeitems";
+import { heroes } from "./data/heroes";
+import { UsernameContext, SteamidContext, BalanceContext, TradeLinkContext } from "./utils/UserContext";
 import { addAndSendTradeBot } from "./services/steamtrade";
 
 //this array would have ITEM name, image url, condition etc, price and add cart function
@@ -47,6 +47,7 @@ export default function Home() {
   const loggedIn = useContext(UsernameContext)
   const steamId = useContext(SteamidContext)
   const {onTradeBalanceContext}:any = useContext(BalanceContext)
+  const tradeLink = useContext(TradeLinkContext)
 
   //Profiler, check speed:
   function onRenderCallback(
@@ -146,7 +147,9 @@ export default function Home() {
       loggedInSteamId: steamId,
       time: currentTime,
       itemsInCart: heroes,
-      correspondingPrices: individualPrices
+      correspondingPrices: individualPrices,
+      tradeLink: tradeLink,
+      transactionId: ""
     }
 
 
@@ -173,17 +176,20 @@ export default function Home() {
       })
       if (response.ok) {
         const res = await response.json()
-        if (!res) {
+        if (!res.newBalance) {
           setTradeError("Error, missing funds.")
         } else {
           setTradeError("Success, waiting for bot.")
-          await fetch("/tempapi/tradeoffer/", {
+          userTrade.transactionId = res.transactionId
+          const response = await fetch("/tempapi/tradeoffer/", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
             },
             body: JSON.stringify(userTrade)
           })
+          const body = await response.json()
+          setTradeError(body)
           //addAndSendTradeBot(userTrade.itemsInCart, userTrade.loggedInSteamId) //sends trade offer using bot
           onTradeBalanceContext()
         }
