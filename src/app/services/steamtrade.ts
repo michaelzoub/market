@@ -10,7 +10,7 @@ const steamGuard: any = process.env.STEAM_BOT_GUARD
 
 const SteamID = TradeOfferManager.SteamID
 let testPartner = new SteamID("[U:1:440715549]")
-let testToken = "mB8IC961"
+let testToken = "mB8IC961" //user's trade link
 
 const client = new SteamUser()
 const manager = new TradeOfferManager({
@@ -37,7 +37,7 @@ export function getSteamIdAndToken(steamId: string, tradeOfferLink: string) {
     return tokenAndSteamObject
 }
 
-function addMyItemByName(itemName: string, manager: any) {
+function addMyItemByName(itemName: any, manager: any) {
             //we'd later switch 730 and 2 to Deadlock's numbers
             manager.getUserInventoryContents(730, 2, true, () => (err:any, items:any) => {
                 if (err) {
@@ -61,25 +61,47 @@ function addMyItemByName(itemName: string, manager: any) {
             });
     }
 
+function addPartnerItemByName(itemsList:any, manager: TradeOfferManager, steamId: string, token: string) {
+    const steamId3 = new SteamID(steamId)
+    const partner = new TradeOffer(manager, steamId3, token)
+    partner.getPartnerInventoryContents(730, 2, () => (err:any, items:any) => {
+        if (err) {
+            console.error("Error fetching inventory: ", err)
+            return false
+        }
+        if (items.length == 0) {
+            // Inventory empty
+            console.log("CS:GO inventory is empty")
+            return false
+        }
+        // Find the item by name
+        const item = items.find((i: any) => i.name === itemsList);
+        
+        if (item) {
+            //const result = manager.addMyItem(item);
+            return item
+        } else {
+            return false // Item not found
+        }
+    })
+}
+
 async function fetchTargetItems(steamId: string) {
     const response = await fetch(`https://steamcommunity.com/inventory/${steamId}/730/2?l=english&count=5000`)
     const json = await response.json()
     return json
 }
 
-export function getInventory() {
-
-}
-
-export async function addAndSendTradeBot(itemStringList: any, steamId: string, token: string, transactionId: string) {
+export async function addAndSendTradeBot(itemStringList: any, userItemStringList: any, steamId: string, token: string, transactionId: string) {
     //first log in
     client.logOn(logOnOptions)
     client.on('loggedOn', function() {
         console.log("Logged into Steam");
     })
     const fetchedItems = await fetchTargetItems(steamId)
+    const getUserItems: any = addPartnerItemByName(userItemStringList, manager, steamId, token)
     const getItems: any = addMyItemByName(itemStringList, manager) //this gets the select items
-    if (getItems == false) {
+    if (getItems == false || getUserItems == false) {
         return
     }
     //check if items exist in steam inventory
@@ -97,7 +119,10 @@ export async function addAndSendTradeBot(itemStringList: any, steamId: string, t
         if (itemStringList.every((e:string) => fetchedItems.includes(e))) {
             //then send trade
             let createdOffer = manager.createOffer(`https://steamcommunity.com/tradeoffer/new/?partner=${steamId}&token=${token}`)
+            //add our trade bot's items
             createdOffer.addMyItems(getItems)
+            createdOffer.addTheirItem(getUserItems)
+            //add partner items if any
             createdOffer.setMessage(`Transaction ID: ${transactionId}`)
             createdOffer.send(() => (error: any, status: any) => {
                 if (error) {

@@ -12,6 +12,14 @@ import { fakeItems } from "./data/fakeitems";
 import { heroes } from "./data/heroes";
 import { UsernameContext, SteamidContext, BalanceContext, TradeLinkContext } from "./utils/UserContext";
 import { addAndSendTradeBot } from "./services/steamtrade";
+import Loading from "./components/loading";
+
+interface ReturnedSkin {
+  id: string;
+  price: string;
+  hero: string;
+  imgurl: string;
+}
 
 //this array would have ITEM name, image url, condition etc, price and add cart function
 
@@ -34,20 +42,47 @@ export default function Home() {
 
   const [inCart, setInCart] = useState<string[]>([])
   const [cartPrice, setCartPrice] = useState<number>(0)
+  const [inUsersCart, setInUsersCart] = useState<string[]>([])
+  const [userCartPrice, setUserCartPrice] = useState<number>(0)
 
   const [smallRange, setSmallRange] = useState<number>(0)
   const [bigRange, setBigRange] = useState<number>(0)
 
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState("")
   const [searchFilter, setSearchFilter] = useState<string[]>([])
   const [searchCondition, setSearchCondition] = useState(false)
+  const [searchTermUser, setSearchTermUser] = useState("")
 
   const [qmarkClicked, setQmarkClicked] = useState(false)
+
+  const [userInventory, setUserInventory] = useState<ReturnedSkin[]>([])
 
   const loggedIn = useContext(UsernameContext)
   const steamId = useContext(SteamidContext)
   const {onTradeBalanceContext}:any = useContext(BalanceContext)
   const tradeLink = useContext(TradeLinkContext)
+
+  useEffect(()=> {
+
+    async function fetchUserInventory() {
+      const response = await fetch(`http://localhost:8080/api/userinventoryonload`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(76561198400981277)//steamId
+      })
+      const body = await response.json()
+      console.log(body)
+      setUserInventory(body)
+      return body
+    }
+
+    fetchUserInventory()
+  }, [steamId])
+
+  //domain -> change depending on dev or prod:
+  const domain = "http://localhost:8080"
 
   //Profiler, check speed:
   function onRenderCallback(
@@ -91,6 +126,13 @@ export default function Home() {
     ), [fakeItems, checkedGlobal, checkedHeroes, smallRange, bigRange, searchCondition, filterGlobal, searchFilter, isPriceInRange, matchesFilters]
   )
 
+  const filteredItemsUser = useMemo(() => 
+    Array.isArray(userInventory) ? 
+    userInventory?.filter(e => 
+      e.hero?.toLowerCase().includes(searchTermUser.toLowerCase())
+    ) : [], [searchTermUser, userInventory]
+  )
+
   const object = {
     hero: checkedHeroes
   }
@@ -111,20 +153,41 @@ export default function Home() {
 
   //add in cart items to cookies
   function addToCart(e: any) {
-    console.log(inCart)
-    let temp = e.target.value 
-    let parsed = parseInt(temp)
-    if (inCart.includes(temp)) {
-      setInCart((prev) => inCart.filter((e) => e !== temp))
-      const find = fakeItems.find(item => item.id === parsed);
-      const price: any = find?.price
-     setCartPrice((e) => e - price)
-    } else {
-      setInCart((prev) => [...prev, temp])
-      //find id and then price
-      const find = fakeItems.find(item => item.id === parsed);
-      const price: any = find?.price
-      setCartPrice((e) => e + price)
+    const target = e.currentTarget; // Use currentTarget for better reliability
+    const key = target.getAttribute('data-key'); 
+    if (key == "botcart") {
+      console.log(inCart)
+      let temp = e.target.value 
+      let parsed = parseInt(temp)
+      if (inCart.includes(temp)) {
+        setInCart((prev) => inCart.filter((e) => e !== temp))
+        const find = fakeItems.find(item => item.id === parsed);
+        const price: any = find?.price
+       setCartPrice((e) => e - price)
+      } else {
+        setInCart((prev) => [...prev, temp])
+        //find id and then price
+        const find = fakeItems.find(item => item.id === parsed);
+        const price: any = find?.price
+        setCartPrice((e) => e + price)
+      }
+    } if (key == "usercart") {
+      console.log(inUsersCart)
+      let temp = e.target.value 
+      //let parsed = parseInt(temp).toString()
+      if (inUsersCart.includes(temp)) {
+        setInUsersCart((prev) => inUsersCart.filter((e) => e !== temp))
+        const find = userInventory.find(item => item.id === temp);
+        const price: any = find?.price
+       setUserCartPrice((e) => e - price)
+      } else {
+        setInUsersCart((prev) => [...prev, temp])
+        //find id and then price
+        const find = userInventory.find(item => item.id === temp);
+        const price: any = find?.price
+        console.log("User price: ", price)
+        setUserCartPrice((e) => e + Number(price))
+      }
     }
   }
 
@@ -144,9 +207,11 @@ export default function Home() {
 
     const userTrade = {
       cartValue: Number(cartPrice),
+      userCartValue: userCartPrice,
       loggedInSteamId: steamId,
       time: currentTime,
-      itemsInCart: heroes,
+      itemsInCart: inCart,
+      userItemsInCart: inUsersCart,
       correspondingPrices: individualPrices,
       tradeLink: tradeLink,
       transactionId: ""
@@ -295,14 +360,6 @@ export default function Home() {
       const [time, setTime] = useState(1)
       const [test, setTest]:any = useState(false)
 
-      useEffect(()=> {
-        console.log(language.toString())
-        console.log(matchingObjectKey)
-        setTimeout(() => {
-          console.log('context:', loggedIn)
-        }, 500)
-      }, [])
-
 
 
   return (
@@ -313,20 +370,24 @@ export default function Home() {
       <div className="flex-col w-full fade-in-largecontainer">
       <div className="flex flex-row justify-between mt-20 insidebox p-2 rounded-sm">
         <div className="">{/*You are giving:*/} {array[0]}</div>
-        <div className="whitespace-nowrap">{matchingObjectKey}0 🛒</div>
+        <div className="whitespace-nowrap">$ {userCartPrice} 🛒</div>
       </div>
       <div className="overflow-auto p-2 tradebox h-[85%] mt-3 rounded-sm">
-      <input className="w-full px-2 m-1 mb-2 mx-auto rounded-sm searchbg" placeholder={`${array[14]}`} onChange={itemSearch}></input>
-      <div className={`${loggedIn? 'opacity-0 flex flex-col visible mx-auto text-center gap-2 mt-20' : 'flex flex-col visible mx-auto text-center gap-2 mt-20'}`}>
+      <input className="w-full px-2 m-1 mb-2 mx-auto rounded-sm searchbg" placeholder={`${array[14]}`} onChange={(e) => setSearchTermUser(e.target.value)} value={searchTermUser}></input>
+      <div className={`${loggedIn? 'hidden opacity-0 flex flex-col visible mx-auto text-center gap-2 mt-20' : 'flex flex-col visible mx-auto text-center gap-2 mt-20'}`}>
         <div className="text-4xl">❗</div>
         <div className="text-xl font-semibold">{array[1]}</div>
-        <Link href="" className="redaccenttext mt-2 font-light hover:redhoveraccent">{array[2]}</Link>
+        <Link href="" prefetch={true} className="redaccenttext mt-2 font-light hover:redhoveraccent">{array[2]}</Link>
       </div>
-      <div className={`${signed? 'grid gap-2 items-grid' : 'hidden'}`}>
-        {fakeItems.map((e) => 
-          <div className={`${checkedGlobal ? `${checkedHeroes.includes(e.hero) && e.price >= smallRange || e.price <= bigRange ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-blue-500' : 'hidden'}` : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-blue-500'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
-            <button className={`${inCart.includes(`${e.id}`)? 'text-white justify-end redhoveraccent w-full rounded-sm' : 'w-full text-white h-fit justify-end bg-zinc-600 w-full rounded-sm transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>{array[3]}</button>
-          </div>
+      <div className={`${loggedIn? 'grid gap-2 items-grid' : 'hidden'}`}>
+        {filteredItemsUser.map((e:any) => 
+        <Suspense fallback={<Loading></Loading>}>
+        <div className={`${checkedGlobal ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-red-400' : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-red-400'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
+            <div className="mt-[5px] text-2xs text-zinc-200 w-24 overflow-hidden whitespace-nowrap text-ellipsis">{e.hero}</div>
+            <div className="mt-[1px] mb-1 text-xs text-zinc-100">$ {e.price}</div>
+            <button className={`${inUsersCart.includes(`${e.id}`)? 'py-1 text-sm text-white justify-end redaccent rounded-sm' : 'py-1 text-sm text-white h-fit justify-end cartbutton w-full rounded-sm transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id} data-key="usercart">🛒</button>
+        </div>
+        </Suspense>
         )}
       </div>
       </div>
@@ -335,6 +396,7 @@ export default function Home() {
 
       <div className="fade-in-rest flex flex-col mx-auto py-10 pb-36 rounded-sm w-full order-last md:w-fit md:mx-5 md:py-0 md:order-none md:mb-0">
         <button onClick={tradeFunctionality} className="mt-20 mx-auto rounded-sm redaccent py-[10px] text-sm shadow-inner text-lg w-[65%]">{array[4]}</button>
+        <Link href="/test" className="mx-auto rounded-sm py-[10px] text-sm shadow-inner text-lg w-[65%] text-center mt-4">Test</Link>
         <div className="justify-between flex flex-col h-[85%] rounded-sm p-2 mt-3 overflow-auto">
         <div className="w-full mx-auto flex flex-col p-1 mt-3 rounded-sm text-center gap-4">
           <div className="text-center">{array[5]}</div>
@@ -376,8 +438,9 @@ export default function Home() {
             <div className="grid gap-2 items-grid">
             {filteredItems.map((e) => 
             <div className={`${checkedGlobal ? 'flex flex-col h-full w-full pb-1 px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox hover:bg-zinc-500 hover:border-red-400' : 'flex flex-col h-full w-full px-1 insidebox rounded-sm shadow-inner border-2 borderinsidebox pb-1 hover:bg-zinc-500 hover:border-red-400'}`}><Image src={e.imgurl} alt='img' width={120} height={80} className="mx-auto"></Image>
-                <div className="my-1 text-sm text-zinc-100">$USD {e.price}</div>
-                <button className={`${inCart.includes(`${e.id}`)? 'py-1 text-sm text-white justify-end redaccent rounded-sm' : 'py-1 text-sm text-white h-fit justify-end cartbutton w-full rounded-sm transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id}>🛒</button>
+                <div className="mt-[5px] text-2xs text-zinc-200 w-24 overflow-hidden whitespace-nowrap text-ellipsis">{e.hero}</div>
+                <div className="mt-[1px] mb-1 text-xs text-zinc-100">$ {e.price}</div>
+                <button className={`${inCart.includes(`${e.id}`)? 'py-1 text-sm text-white justify-end redaccent rounded-sm' : 'py-1 text-sm text-white h-fit justify-end cartbutton w-full rounded-sm transition ease-in-out delay-150 hover:bg-red-300'}`} onClick={addToCart} value={e.id} data-key="botcart">🛒</button>
             </div>
             )}
             </div>

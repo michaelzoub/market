@@ -4,7 +4,7 @@ export const UsernameContext = createContext("")
 
 export const UserprofilepicContext = createContext("")
 
-export const SteamidContext = createContext("null")
+export const SteamidContext = createContext("")
 
 export const TotalTradesContext = createContext("")
 

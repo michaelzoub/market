@@ -33,17 +33,34 @@ export const paymentOptions = [
 
 export const cryptoOptions = [
     {
-        name: "Ethereum",
+        name: "ETH",
         href: "/",
         img: ethereum,
         slug: "ethereum-crypto-payment",
         color: "text-blue-400"
     },
     {
-        name: "Bitcoin",
+        name: "BTC",
         href: "/",
         img: bitcoin,
         slug: "bitcoin-crypto-payment",
         color: "text-orange-400"
+    },
+    {
+        name: "USDC",
+        href: "/",
+        img: "",
+        slug: "usdc-crypto-payment",
+        color: "text-blue-500"
+    }
+]
+
+export const cryptoSolo = [
+    {
+        name: "Crypto",
+        href: "/",
+        img: "",
+        slug: "crypto",
+        color: "text-blue-500"
     }
 ]

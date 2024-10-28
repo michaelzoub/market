@@ -9,13 +9,9 @@ import Image from "next/image"
 import qr from "/public/qr.svg"
 import { formInterface } from "./interface"
 import { Elements } from "@stripe/react-stripe-js";
-import {
-    PaymentElement,
-    useStripe,
-    useElements
-  } from "@stripe/react-stripe-js";
-  import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import PayButton from "@/app/components/checkoutform"
+import { createUUIDForCryptoTx } from "@/app/utils/uuid"
 
 const stripePromise = loadStripe("pk_test_51Q2bcKGPi4c603NdurI8SIfP2kblRigYA84OIWosdNUgYtwcMfN6fxa4b9cVhEX6QmUHdsNZb3PlNm83hhxPH3vo00NlENq6XE");
 
@@ -57,7 +53,7 @@ const fakeTxData = [
 
 const suggestedDeposits = [10, 25, 75, 250]
 
-const itemsPerPage = 1;
+const itemsPerPage = 3;
 
 export default function paymentSlug({ params }: any) { //number for total amount of pages
     const totalPages = Math.ceil(fakeTxData.length / itemsPerPage)
@@ -72,6 +68,8 @@ export default function paymentSlug({ params }: any) { //number for total amount
     const [clientSecretState, setClientSecretState] = useState("")
     const [buttonColor, setButtonColor] = useState(false)
     const [notNumberError, setNotNumberError] = useState("")
+    const [xamaxWalletAddress, setXamaxWalletAddress] = useState("")
+    const [accessToken, setAccessToken] = useState("")
 
     const startIndex = itemsPerPage * page
     const paginatedData = fakeTxData.slice(startIndex, startIndex + itemsPerPage);
@@ -81,6 +79,10 @@ export default function paymentSlug({ params }: any) { //number for total amount
     let currencyObjectKeys = Object.keys(steamMarketCurrencies)
     let currencyContext = useContext(CurrencyContext)
     let matchingObjectKey = currencyObjectKeys.filter((e) => e === currencyContext)
+
+    //TO DO: implement price conversion https://api.coingecko.com/api/v3/simple/price
+
+    const xamaxApiKey = process.env.XAMA_API
 
     const object: formInterface = {
         payment: inputAmount ?? 0,
@@ -98,6 +100,48 @@ export default function paymentSlug({ params }: any) { //number for total amount
             parsedPages.push(i)
         }
     },[])
+
+    useEffect(() => {
+
+        async function sendToXamax() {
+            const response = await fetch("https://auth.xamax.io/v1/auth/refresh",{
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: JSON.stringify({
+                    refresh_token: xamaxApiKey
+                })
+            })
+            const access_token = await response.json()
+            setAccessToken(access_token)
+        }
+        if(slug.includes("crypto")) {
+            sendToXamax()
+        }
+    },[])
+
+    async function createXamaxInvoice() {
+
+        const uuid = createUUIDForCryptoTx()
+
+        const response = await fetch("https://api.sandbox.xamax.io/v1/transaction/invoice", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                txId: uuid,
+                code: payment.name.toLowerCase(),
+                amount: inputAmount,
+                type: "invoice_type_default"
+            })
+        })
+        const body = await response.json()
+        setXamaxWalletAddress(body.walletAddress)
+        console.log("createXamaxInvoice: ", body)
+    }
 
     function performSelectSelection(e:any) {
         const target = e.target.value
@@ -175,10 +219,13 @@ export default function paymentSlug({ params }: any) { //number for total amount
                 },
                 body: JSON.stringify(object)
             })
-            const body = await response.json()
             setLoading(<div className="z-10 animate-spin radius mx-auto mt-32"></div>)
-            setTimeout(() => setLoadingTimer(true), body? 399 : 1000)
-            setTimeout(() => setLoading(<div></div>), body ? 399 : 1000) 
+            const body = await response.json()
+            setLoading(<div></div>)
+            setLoadingTimer(true)
+            //setLoading(<div className="z-10 animate-spin radius mx-auto mt-32"></div>)
+            //setTimeout(() => setLoadingTimer(true), body? 399 : 1000)
+            //setTimeout(() => setLoading(<div></div>), body ? 399 : 1000) 
             setClientSecretState(body.clientSecret)
         }
     }
@@ -223,47 +270,37 @@ export default function paymentSlug({ params }: any) { //number for total amount
 
     return(
         <main className="z-10 px-10 flex flex-col min-h-screen items-center bgblack gap-8 text-white overflow-auto overflow-x-hidden">
-            {slug.includes("crypto") ?  
-            <div>
-            <div className="mt-20 text-lg font-medium">Deposit <span className={`${String(payment.color)}`}>{payment.name}</span>:</div>
-            <div>
-                You will receive balance automatically after sending {String(payment.name)} to the address displayed below. (12 confirmations required).
-            </div>
-            <div className="flex flex-col gap-2 tradebox px-10 p-4 rounded-sm w-full">
-                <div className="mx-auto text-lg">Wallet address:</div>
-                <Image className="bg-white rounded-sm mx-auto" src={qr} width={200} alt="qr"></Image>
-                <div className="mx-auto mt-4 border-2 rounded-sm border-zinc-400 p-1">Transfer only ${payment.name} to this address</div>
-            </div>
-            <div className="w-full shadow-inner rounded-sm bgblack flex flex-col gap-2 p-4">
-                <div className="text-2xl font-medium">Transaction History:</div>
-                <div className="grid grid-cols divide-y-[1px]">
-                <div className="flex flex-row justify-between text-zinc-300 my-2">
-                    <div>Type</div>
-                    <div>Amount</div>
-                    <div>Date</div>
-                </div>
-                {
-                    paginatedData.map((e) => 
-                    <div className="flex flex-row justify-between p-1 rounded-sm">
-                        <div className="text-red-400 text-left">Sell</div>
-                        <div className="w-52 pl-24 text-left">{e.amount} {matchingObjectKey}</div>
-                        <div className="text-zinc-300">{e.date}</div>
+            {slug.includes("!crypto") ?  
+             <div className="w-full">
+             {loading}
+                <div className={`${xamaxWalletAddress ? "hidden" : "w-fit p-10 px-16 mt-32 mx-auto flex flex-col hoversearchbg rounded-md shadow-inner border-2 border-gray-600"}`}>
+                    <div className="py-2 font-medium text-gray-100 text-lg">Deposit with {payment.name}</div>
+                    <div className="mt-1 mb-4 text-gray-300 text-sm">Enter the amount you would like to checkout with.</div>
+                    <div className="flex flex-row justify-end mx-auto">
+                        <input placeholder="Payment Amount" className="px-[12px] pr-[170px] py-[8px] rounded-sm text-sm bg-[#2B2F3C] border-[1.5px] border-[#e96969]" onChange={(e:any) => setInputAmount(e.target.value)} value={inputAmount} onKeyDown={createXamaxInvoice}></input>
                     </div>
-                )
-                }
+                    <button className="mt-6 mx-[-1px] shadow shadow-red-700 redaccent rounded-sm py-1" onClick={createXamaxInvoice}>Continue</button>
+                    <div className={`${notNumberError ? "absolute flex flex-row mt-[5.5rem] ml-[375px]" : "hidden"}`}>
+                    <div className="absolute right-[-1.8px] text-red-500 text-sm">◀</div>
+                            <span className="absolute bg-red-500 text-white text-xs rounded py-1 px-2 w-[110px]">{notNumberError}</span>
+                    </div>
+                    <div className="py-2 mt-4 font-medium text-gray-100">Or select an amount</div>
+                    <div className="grid prices-grid">
+                        {
+                            suggestedDeposits.map((e:number) => 
+                                <button className="redaccent rounded-sm px-12 py-1 text-gray-200 text-sm shadow shadow-red-700 hover:shadow-red-600" value={e} onClick={(t: any) => setInputAmount(t.target.value)}>{e}$</button>
+                            )
+                        }
+                    </div>
                 </div>
-                <div className="flex flex-row mx-auto gap-4">
-                                <button className="rounded-md bg-red-400 p-2 w-fit" onClick={first} value={1}>First</button>
-                                <div className="flex flex-row gap-2">
-                                    <button className={`${over ? "hidden" : "rounded-md bg-red-400 p-2 w-7"}`} onClick={leftPage} value={center - 1}>{center - 1}</button>
-                                    <button className="rounded-md bg-red-400 p-2 w-7" onClick={(e:any) => setPage(e.target.value - 1)} value={center}>{center}</button>
-                                    <button className="rounded-md bg-red-400 p-2 w-7" onClick={rightPage} value={center + 1}>{center + 1}</button>
-                                </div>
-                                <button className="rounded-md bg-red-400 p-2 w-fit" onClick={last} value={totalPages}>Last</button>
+                <div className={`${xamaxWalletAddress ? "w-fit p-10 px-16 mt-32 mx-auto flex flex-col hoversearchbg rounded-md shadow-inner border-2 border-gray-600 text-left" : "hidden"}`}>
+                        <text className="text-lg font-semibold">New invoice</text>
+                        <text>Amount: {inputAmount}{payment.name}</text>
+                        <text className="text-gray-300">Send to: </text>
+                        <div>{xamaxWalletAddress}</div>
                 </div>
-                <div className="text-sm text-zinc-400 mx-auto m-2">Page {page + 1} - {totalPages}</div>
-            </div>
-            </div>: (slug.includes("cash") ? 
+             </div> 
+            : (slug.includes("cash") ? 
             <div className="w-full">
             {loading}
             <div className={`${clientSecretState ? "hidden" : "w-fit p-10 px-16 mt-32 mx-auto flex flex-col hoversearchbg rounded-md shadow-inner border-2 border-gray-600"}`}>

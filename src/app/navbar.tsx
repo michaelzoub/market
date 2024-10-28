@@ -222,28 +222,28 @@ export function Navbar({children}:any) {
 		<div className={`${tradeLinkWindow ? "absolute z-50 w-full h-screen backdrop-blur" : "hidden"}`}>
 			<div className={`${tradeLinkWindow ? "z-25 w-fit flex flex-col backdrop-blur mx-auto mt-36 p-10 py-16 rounded-md searchbg gap-2 border-2 border-zinc-600 shadow-inner text-center" : "hidden"}`}>
 				<text>Set or change your trade link:</text>
-				<input placeholder="Paste your trade link" className="px-[12px] py-[8px] rounded-sm text-sm bg-[#2B2F3C] border-[1.5px] border-[#e96969]" onChange={(e:any) => setTradeLinkValue(e.target.value)} value={tradeLinkValue} onKeyDown={setTradeLinkCookie}></input>
+				<input placeholder="Paste your trade link" className="px-[12px] py-[8px] shadow-md shadow-red-600 rounded-sm text-sm bg-[#2B2F3C] border-[1.5px] border-[#e96969]" onChange={(e:any) => setTradeLinkValue(e.target.value)} value={tradeLinkValue} onKeyDown={setTradeLinkCookie}></input>
 				<text className="text-sm">You can find your trade link here:</text>
 				<div className="flex flex-row gap-2 w-44 justify-between mx-auto">
-					<Link href={`https://steamcommunity.com/id/me/tradeoffers/privacy#trade_offer_access_url`} target="_blank" className="mx-[-1px] shadow shadow-red-700 redaccent rounded-sm py-[1px] w-20">Link ↗</Link>
+					<Link href={`https://steamcommunity.com/id/me/tradeoffers/privacy#trade_offer_access_url`} prefetch={true} target="_blank" className="mx-[-1px] shadow shadow-red-700 redaccent rounded-sm py-[1px] w-20">Link ↗</Link>
 					<button className="mx-[-1px] shadow shadow-red-700 redaccent rounded-sm py-[1px] w-20" onClick={setTradeLinkCookie} value={tradeLinkValue}>{tradeLinkButtonState}</button>
 				</div>
 			</div>
 		</div>
 		<div className="z-50 fade-in-navbar z-10 invisible md:visible md:w-full flex justify-between text-sm">
       		<div className="flex items-center space-x-6 ml-4">
-				<Link href="/" className="hover:cursor-pointer mr-2">
+				<Link href="/" prefetch={true} className="hover:cursor-pointer mr-2">
 					<Image src={dlockbanner} alt="Dlock Banner" width={140} height={60} />
 				</Link>
-				<Link href="/market" className="z-50 nav-tab font-semibold pt-1 text-gray-500 text-sm hover:text-gray-600">{array[0]}</Link>
-				<Link href="/trade" className="nav-tab  pt-1 font-semibold text-gray-500 text-sm hover:text-gray-600">{array[1]}</Link>
-				<Link href="/components/statsimage" className="nav-tab font-semibold pt-1 text-gray-500 text-sm hover:text-gray-600">{array[2]}</Link>
+				<Link href="/market" prefetch={true} className="z-50 nav-tab font-semibold pt-1 text-gray-500 text-sm hover:text-gray-600">{array[0]}</Link>
+				<Link href="/trade" prefetch={true} className="nav-tab  pt-1 font-semibold text-gray-500 text-sm hover:text-gray-600">{array[1]}</Link>
+				<Link href="/components/statsimage" prefetch={true} className="nav-tab font-semibold pt-1 text-gray-500 text-sm hover:text-gray-600">{array[2]}</Link>
 			</div>
 			<div className="flex items-center mr-2">
-				<Link href="/payment" className="z-10 login-button redaccent rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-sm" onClick={() => setDeposit(true)}>Deposit</Link>
-				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-zinc-300 text-sm" onClick={() => console.log('add withdraw')}>Withdraw</Link>
-				<Link href="/payment" className="z-10 login-button searchbg rounded-sm py-[8px] px-[5px] flex items-center w-fit justify-center text-sm mx-2 text-zinc-300 text-sm truncate ">${loggedInBalance?.includes("null") ? '0' : loggedInBalance}</Link>
-				<Link href={authorizationUrl} className={`${loggedInUsername ? "hidden" : "relative login-button flex items-center mx-3 w-16 py-1 text-sm font-bold rounded-sm"}`}>
+				<Link href="/payment" prefetch={true} className="z-10 login-button redaccent rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-sm" onClick={() => setDeposit(true)}>Deposit</Link>
+				<Link href="/payment" prefetch={true} className="z-10 login-button searchbg rounded-sm py-[8px] flex items-center w-[75px] justify-center text-sm mx-1 text-zinc-300 text-sm" onClick={() => console.log('add withdraw')}>Withdraw</Link>
+				<Link href="/payment" prefetch={true} className="z-10 login-button searchbg rounded-sm py-[8px] px-[5px] flex items-center w-fit justify-center text-sm mx-2 text-zinc-300 text-sm truncate ">${loggedInBalance?.includes("null") ? '0' : loggedInBalance}</Link>
+				<Link href={authorizationUrl} prefetch={true} className={`${loggedInUsername ? "hidden" : "relative login-button flex items-center mx-3 w-16 py-1 text-sm font-bold rounded-sm"}`}>
 					<Image src={steam} alt='steam' width={20} height={20} className={`mr-1 invert`} />
 					Login
 				</Link>
@@ -259,16 +259,16 @@ export function Navbar({children}:any) {
 							<div className="hidden">{loggedInBalance}</div>
 						</button>
 					</div>
-					<div className={`${openProfileSettings ? languagesSettingClicked ? "absolute mr-[285px] mt-[42px] flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden" : "hidden"}`} onMouseLeave={() => setLanguagesSettingClicked(false)}>
-										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton">{languagesArray[0].name}</button>
-										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton">{languagesArray[1].name}</button>
-										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton">{languagesArray[2].name}</button>
-									</div>
+					<div className={`${openProfileSettings ? languagesSettingClicked ? "absolute mr-[286px] mt-[52px] flex flex-col border-[1px] border-zinc-700 searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden" : "hidden"}`} onMouseLeave={() => setLanguagesSettingClicked(false)}>
+										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton hover:text-indigo-400">{languagesArray[0].name}</button>
+										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton hover:text-indigo-400">{languagesArray[1].name}</button>
+										<button className="text-white text-left rounded-md w-full py-1 px-2 hover:cartbutton hover:text-indigo-400">{languagesArray[2].name}</button>
+					</div>
 					<div className={`absolute top-full w-36 mt-[-7px] ml-[-29.8px] transition-max-height duration-150 overflow-hidden ${openProfileSettings ? "" : "max-h-0"}`}>
-						<div className={`${openProfileSettings ? "flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200" : "hidden"}`}>
-								<Link href={`http://localhost:3000/${loggedInSteamId}/transaction`} className="text-left rounded-md w-full py-1 px-2 hover:cartbutton">Transactions</Link>
-								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton" onClick={() => setTradeLinkWindow(curr => !curr)}>Trade link</button>
-								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton" onMouseEnter={() => setLanguagesSettingClicked(true)} onMouseLeave={() => setLanguagesSettingClicked(false)}>Languages ←</button>
+						<div className={`${openProfileSettings ? "flex flex-col searchbg px-1 py-1 text-sm font-normal rounded-md shadow-inner text-gray-200 border-[1px] border-zinc-700" : "hidden"}`}>
+								<Link href={`http://localhost:3000/${loggedInSteamId}/transaction`} prefetch={true} className="text-left rounded-md w-full py-1 px-2 hover:cartbutton hover:text-indigo-400">Transactions</Link>
+								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton hover:text-indigo-400" onClick={() => setTradeLinkWindow(curr => !curr)}>Trade link</button>
+								<button className="text-left rounded-md w-full py-1 px-2 hover:cartbutton hover:text-indigo-400" onMouseEnter={() => setLanguagesSettingClicked(true)}>Languages</button>
 								<button className="text-left rounded-md w-full py-1 px-2 text-red-400 hover:cartbutton" onClick={clearCookies}>Logout</button>
 						</div>
 					</div>
@@ -280,15 +280,15 @@ export function Navbar({children}:any) {
 			<div className="flex flex-col w-full">
 				<button className={`${sidebar? 'z-20 absolute end-0 text-end m-4 text-red-400' : 'absolute end-0 text-end m-4'}`} onClick={sideBar}>═</button>
 				<div className={`${sidebar? 'z-10 flex flex-row h-screen justify-end w-full transition ease-in-out delay-150 backdrop-blur' : 'w-full navbarblur'}`}>
-				<div className={`${showBar? 'z-10 flex flex-col gap-4 animate-show w-[100%] tradebox h-screen pt-14 text-left px-4' : 'hiddenLogin flex flex-col gap-4 w-[100%] h-screen tradebox pt-14 px-4'}`}>
+				<div className={`${showBar? 'z-10 flex flex-col gap-2 animate-show w-[100%] tradebox h-screen pt-14 text-left px-4' : 'hiddenLogin flex flex-col gap-2 w-[100%] h-screen tradebox pt-14 px-4'}`}>
 				<div className="mx-auto flex flex-row text-xl hover:cursor-pointer font-bold">d<span className="text-red-500">lock</span>.shop</div>
-				<Link href="/service/api/auth/login" className="login-button flex items-center px-6 py-2 text-sm font-bold mx-auto hover:redhoveraccenttext">
+				<Link href={authorizationUrl} prefetch={true} className={`${loggedInUsername ? "hidden" : "login-button flex items-center px-6 py-2 text-md font-bold mx-auto"}`}>
 							<Image src={steam} alt='steam' width={20} height={20} className="mr-2 invert" />
 							Login
 				</Link>
-				<div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Market</div>
-				<div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">Trade</div>
-				<div className="border-2 border-red-400 p-1 pl-3 rounded-md hover:text-red-400 hover:cursor-pointer">FAQ</div>
+				<div className="rounded-md p-1 pl-3 hover:cartbutton">Transactions</div>
+				<div className="rounded-md p-1 pl-3 hover:cartbutton" onClick={() => setTradeLinkWindow(curr => !curr)}>Trade link</div>
+				<div className="rounded-md p-1 pl-3 text-red-400 hover:text-red-500 hover:cartbutton" onClick={clearCookies}>Logout</div>
 				</div>
 				</div>
 			</div>

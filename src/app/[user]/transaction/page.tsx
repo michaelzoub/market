@@ -44,7 +44,7 @@ export default function Transactions() {
                 {paginatedData.map((e) =>
                     <div className="flex flex-row justify-between gap-2">
                         <div>{startIndexForDisplay++}</div>
-                        <Link href={`${window.location.pathname}/${e}`} className="text-left">{e.split("=")}</Link> 
+                        <Link href={`${window.location.pathname}/${e}`} prefetch={true} className="text-left">{e.split("=")}</Link> 
                     </div> 
                 )}
             </div>
