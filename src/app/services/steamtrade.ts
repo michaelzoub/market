@@ -92,60 +92,74 @@ async function fetchTargetItems(steamId: string) {
     return json
 }
 
-export async function addAndSendTradeBot(itemStringList: any, userItemStringList: any, steamId: string, token: string, transactionId: string) {
-    //first log in
-    client.logOn(logOnOptions)
+export async function addAndSendTradeBot(itemStringList: any, userItemStringList: any, steamId: string, token: string, transactionId: string): Promise<any> {
+    // First log in
+    client.logOn(logOnOptions);
     client.on('loggedOn', function() {
         console.log("Logged into Steam");
-    })
-    const fetchedItems = await fetchTargetItems(steamId)
-    const getUserItems: any = addPartnerItemByName(userItemStringList, manager, steamId, token)
-    const getItems: any = addMyItemByName(itemStringList, manager) //this gets the select items
-    if (getItems == false || getUserItems == false) {
-        return
+    });
+
+    const fetchedItems = await fetchTargetItems(steamId);
+    const getUserItems: any = addPartnerItemByName(userItemStringList, manager, steamId, token);
+    const getItems: any = addMyItemByName(itemStringList, manager); // This gets the selected items
+
+    if (getItems === false || getUserItems === false) {
+        return "Error: Invalid items"; // Return error if items are not valid
     }
-    //check if items exist in steam inventory
-    manager.getInventoryContents(730, 2, true, () => (err: any, inventory: any) => {
-        if (err) {
-            console.log(err)
-            return
-        }
 
-        if (inventory.length == 0) {
-            // Inventory empty
-            console.log("CS:GO inventory is empty")
-            return
-        }
-        if (itemStringList.every((e:string) => fetchedItems.includes(e))) {
-            //then send trade
-            let createdOffer = manager.createOffer(`https://steamcommunity.com/tradeoffer/new/?partner=${steamId}&token=${token}`)
-            //add our trade bot's items
-            createdOffer.addMyItems(getItems)
-            createdOffer.addTheirItem(getUserItems)
-            //add partner items if any
-            createdOffer.setMessage(`Transaction ID: ${transactionId}`)
-            createdOffer.send(() => (error: any, status: any) => {
-                if (error) {
-                    console.log(error)
-                    return
-                }
-                if (status === "pending") {
-                    console.log("Offer sent, requires confirmation.")
-                    community.acceptConfirmationForObject("identitySecret", createdOffer.id, () => (error:any) => {
-                        if (error) {
-                            console.log(error)
-                        } else {
-                            console.log("Offer confirmed")
-                        }
-                    })
-                } else {
-                    console.log("Offer succesfully sent.")
-                }
-            })
-            return fetchedItems
-        } else {
-        throw new Error("Some items don't exist.")
-        }
-    })
+    // Return a new Promise to handle the async flow
+    return new Promise((resolve, reject) => {
+        // Check if items exist in Steam inventory
+        manager.getInventoryContents(730, 2, true, (err: any, inventory: any) => {
+            if (err) {
+                console.log(err);
+                return resolve("Error: Inventory retrieval failed");
+            }
+
+            if (inventory.length === 0) {
+                // Inventory empty
+                console.log("CS:GO inventory is empty");
+                return resolve("Empty: No items in inventory");
+            }
+
+            if (itemStringList.every((e: string) => fetchedItems.includes(e))) {
+                // Then send trade
+                let createdOffer = manager.createOffer(`https://steamcommunity.com/tradeoffer/new/?partner=${steamId}&token=${token}`);
+                
+                // Add our trade bot's items
+                createdOffer.addMyItems(getItems);
+                createdOffer.addTheirItem(getUserItems);
+                
+                // Add partner items if any
+                const offerId = createdOffer.id;
+                createdOffer.setMessage(`Transaction ID: ${transactionId}`);
+
+                createdOffer.send((error: any, status: any) => {
+                    if (error) {
+                        console.log(error);
+                        return resolve("Error: Failed to send offer");
+                    }
+
+                    if (status === "pending") {
+                        console.log("Offer sent, requires confirmation.");
+                        community.acceptConfirmationForObject("identitySecret", offerId, (error: any) => {
+                            if (error) {
+                                console.log(error);
+                                return resolve("Error: Confirmation failed");
+                            } else {
+                                console.log("Offer confirmed");
+                                return resolve({ status: "Confirmed", offerId: offerId });
+                            }
+                        });
+                    } else {
+                        console.log("Offer successfully sent.");
+                        return resolve({ status: "Confirmed", offerId: offerId });
+                    }
+                });
+
+            } else {
+                return resolve("Error: Some items don't exist in inventory.");
+            }
+        });
+    });
 }
-

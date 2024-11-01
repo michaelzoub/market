@@ -81,6 +81,8 @@ export default function Home() {
     fetchUserInventory()
   }, [steamId])
 
+  //this 
+
   //domain -> change depending on dev or prod:
   const domain = "http://localhost:8080"
 
