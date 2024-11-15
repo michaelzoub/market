@@ -64,7 +64,18 @@ export default function Home() {
 
   useEffect(()=> {
 
+    if (process.env.DEVORPROD == "dev") {
+      return
+    }
+
     async function fetchUserInventory() {
+
+      console.log("process.env: ", process.env.DEVORPROD)
+
+      if (process.env.DEVORPROD == "dev") {
+        return
+      }
+
       const response = await fetch(`http://localhost:8080/api/userinventoryonload`, {
         method: "POST",
         headers: {

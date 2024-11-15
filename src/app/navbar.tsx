@@ -21,7 +21,7 @@ export function Navbar({children}:any) {
 	const [openDropdown, setOpenDropdown] = useState<'language' | 'currency' | null>(null)
 	const [selectedLanguage, setSelectedLanguage]:any = useState({ code: 'EN', name: 'English', flag: usa });
   	const [loginClick, setLoginClick] = useState(false)
-	const [path, setPath] = useState(location.pathname)
+	const [path, setPath] = useState('')
 	const [loggedInUsername, setLoggedInUsername] = useState("")
 	const [loggedInPfp, setLoggedInPfp] = useState("")
 	const [loggedInBalance, setLoggedInBalance] = useState("0.0")
@@ -50,7 +50,17 @@ export function Navbar({children}:any) {
 	{ code: 'CH', name: 'Chinese', flag: china }]
 
   useEffect(() => {
+	
+	if (typeof window !== 'undefined') {
+		setPath(window.location.pathname);
+	  }
+
 	async function updateBalance() {
+
+		if (process.env.DEVORPROD == "dev") {
+			return
+		}
+
 		const response = await fetch("http://localhost:8080/api/updatebalance", {
 			method: "GET",
 			headers: {
@@ -76,9 +86,12 @@ export function Navbar({children}:any) {
 
 	setLanguageslength(Object.keys(languagesnavbar).length)
 
-    setPath(location.pathname);
+    setPath(window.location.pathname);
 
     async function fetchCookies() {
+		if (process.env.DEVORPROD == "dev") {
+			return
+		}
         try {
             const response = await fetch("http://localhost:8080/api/usercookies", {
                 method: 'GET',
